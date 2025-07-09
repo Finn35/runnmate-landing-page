@@ -25,9 +25,10 @@ interface StravaActivity {
 export async function GET(request: NextRequest) {
   let searchParams;
   try {
-    const url = new URL(request.url, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+    const safeUrl = typeof request.url === 'string' && request.url.startsWith('/') ? request.url : '/';
+    const url = new URL(safeUrl, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
     searchParams = url.searchParams;
-  } catch {
+  } catch (e) {
     // If the URL is invalid (e.g. during static build), return a safe response
     return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 });
   }
