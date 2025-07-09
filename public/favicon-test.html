@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUNNMATE - Favicon Test</title>
+    
+    <!-- Multiple favicon references to ensure loading -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/runnmate-icon.svg">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .favicon-display {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #dcfce7;
+            border: 2px solid #16a34a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .logo {
+            color: #EA580C;
+            font-weight: bold;
+            font-size: 28px;
+        }
+        h1 { color: #1f2937; }
+        h2 { color: #374151; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏃‍♂️ <span class="logo">RUNNMATE</span> Favicon Test</h1>
+        
+        <div class="favicon-display">
+            <h2>🔥 NEW FAVICON:</h2>
+            <div style="display: flex; justify-content: center; gap: 20px; align-items: center;">
+                <div>
+                    <p><strong>Current:</strong></p>
+                    <img src="/favicon.svg" width="64" height="64" alt="RUNNMATE Favicon" style="border: 2px solid #ccc;">
+                </div>
+                <div>
+                    <p><strong>Backup:</strong></p>
+                    <img src="/runnmate-icon.svg" width="64" height="64" alt="RUNNMATE Icon" style="border: 2px solid #ccc;">
+                </div>
+            </div>
+            <p><strong>🟠 Bright Orange Circle with White "R"</strong></p>
+            <p>This should now appear in your browser tab!</p>
+        </div>
+
+        <div class="success">
+            <h3>✅ Solution Applied:</h3>
+            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <li>✅ Created favicon.svg (matching cached path)</li>
+                <li>✅ Created runnmate-icon.svg (backup)</li>
+                <li>✅ Restarted development server</li>
+                <li>✅ Added explicit head tags</li>
+                <li>✅ Multiple cache-busting techniques</li>
+            </ul>
+        </div>
+
+        <hr style="margin: 30px 0;">
+        
+        <h3>🔄 Still seeing old favicon?</h3>
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Close this tab completely and open a new one:</strong></p>
+            <p><a href="/" style="background: #EA580C; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">🏠 Open Fresh Homepage</a></p>
+        </div>
+        
+        <p style="color: #6b7280; font-size: 14px;">
+            <em>Browser favicon cache can take 1-2 minutes to update completely.</em>
+        </p>
+    </div>
+
+    <script>
+        // Force favicon refresh every 5 seconds
+        setInterval(() => {
+            let links = document.querySelectorAll('link[rel*="icon"]');
+            links.forEach(link => {
+                let href = link.href.split('?')[0];
+                link.href = href + '?v=' + Date.now();
+            });
+        }, 5000);
+        
+        console.log('🏃‍♂️ RUNNMATE favicon test loaded');
+        console.log('📋 Check browser tab for orange "R" icon');
+    </script>
+</body>
+</html> 

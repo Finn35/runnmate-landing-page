@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUNNMATE - New Favicon Test</title>
+    <link rel="icon" type="image/svg+xml" href="/runnmate-icon.svg?v=3">
+    <link rel="shortcut icon" href="/runnmate-icon.svg?v=3">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .favicon-display {
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .instructions {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏃‍♂️ RUNNMATE Favicon Test</h1>
+    
+    <div class="favicon-display">
+        <h2>New Favicon Preview:</h2>
+        <img src="/runnmate-icon.svg?v=3" width="64" height="64" alt="RUNNMATE Favicon">
+        <p>This is the new RUNNMATE favicon with bright orange "R" - completely distinctive!</p>
+    </div>
+    
+    <div class="instructions">
+        <h3>🔄 To Clear Browser Cache:</h3>
+        <ol>
+            <li><strong>Chrome/Edge:</strong> Ctrl+Shift+R (hard refresh)</li>
+            <li><strong>Firefox:</strong> Ctrl+F5</li>
+            <li><strong>Safari:</strong> Cmd+Shift+R</li>
+            <li><strong>Or:</strong> Close browser completely and reopen</li>
+        </ol>
+        <p><strong>Note:</strong> Browser favicon cache can take 10-15 minutes to update completely.</p>
+    </div>
+    
+    <a href="/" style="color: #2563EB; text-decoration: none; font-weight: bold;">
+        ← Back to RUNNMATE Homepage
+    </a>
+    
+    <script>
+        // Force reload favicon
+        setTimeout(() => {
+            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/svg+xml';
+            link.rel = 'shortcut icon';
+            link.href = '/runnmate-icon.svg?v=' + Date.now();
+            document.getElementsByTagName('head')[0].appendChild(link);
+        }, 1000);
+    </script>
+</body>
+</html> 

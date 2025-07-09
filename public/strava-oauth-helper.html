@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava OAuth Helper - RUNNMATE</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .btn {
+            background: #f97316;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #ea580c;
+        }
+        .btn.secondary {
+            background: #6b7280;
+        }
+        .btn.secondary:hover {
+            background: #4b5563;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            color: #0c4a6e;
+        }
+        .url-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .warning {
+            background: #fffbeb;
+            border: 2px solid #f59e0b;
+            color: #92400e;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .steps {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            color: #065f46;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .steps ol {
+            margin: 10px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Strava OAuth Helper</h1>
+        <p class="subtitle">Generate the correct OAuth URL with activity:read permissions</p>
+        
+        <div class="warning">
+            <strong>📋 Setup Required:</strong> You need a Strava app first! Create one at <a href="https://www.strava.com/settings/api" target="_blank">strava.com/settings/api</a>
+        </div>
+
+        <form id="oauthForm">
+            <div class="form-group">
+                <label for="clientId">Strava Client ID *</label>
+                <input type="text" id="clientId" placeholder="Your Strava app client ID" required>
+            </div>
+
+            <div class="form-group">
+                <label for="redirectUri">Redirect URI *</label>
+                <input type="url" id="redirectUri" value="http://localhost:3000/api/strava/callback" required>
+                <small style="color: #6b7280;">This should match what you set in your Strava app settings</small>
+            </div>
+
+            <button type="button" class="btn" onclick="generateUrl()">Generate OAuth URL</button>
+            <button type="button" class="btn secondary" onclick="openPlayground()">Use Strava Playground</button>
+        </form>
+
+        <div id="result" style="display: none;">
+            <div class="result">
+                <h3>🎯 Your OAuth URL:</h3>
+                <div class="url-display" id="generatedUrl"></div>
+                
+                <button type="button" class="btn" onclick="copyUrl()">Copy URL</button>
+                <button type="button" class="btn secondary" onclick="openUrl()">Open in Browser</button>
+            </div>
+
+            <div class="steps">
+                <h3>📋 Next Steps:</h3>
+                <ol>
+                    <li>Click "Open in Browser" or copy the URL above</li>
+                    <li>Log in to Strava and authorize your app</li>
+                    <li>You'll be redirected back with a <code>code</code> parameter</li>
+                    <li>Exchange that code for tokens using your app's token endpoint</li>
+                    <li>Use the tokens in the <a href="/strava-test.html">test page</a></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedOAuthUrl = '';
+
+        function generateUrl() {
+            const clientId = document.getElementById('clientId').value.trim();
+            const redirectUri = document.getElementById('redirectUri').value.trim();
+
+            if (!clientId || !redirectUri) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                client_id: clientId,
+                response_type: 'code',
+                redirect_uri: redirectUri,
+                approval_prompt: 'force',
+                scope: 'read,activity:read'
+            });
+
+            generatedOAuthUrl = `https://www.strava.com/oauth/authorize?${params.toString()}`;
+            
+            document.getElementById('generatedUrl').textContent = generatedOAuthUrl;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function copyUrl() {
+            navigator.clipboard.writeText(generatedOAuthUrl).then(() => {
+                alert('URL copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = generatedOAuthUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('URL copied to clipboard!');
+            });
+        }
+
+        function openUrl() {
+            if (generatedOAuthUrl) {
+                window.open(generatedOAuthUrl, '_blank');
+            }
+        }
+
+        function openPlayground() {
+            const playgroundUrl = 'https://developers.strava.com/playground/';
+            window.open(playgroundUrl, '_blank');
+            alert('Remember to check "View data about your activities" for the activity:read scope!');
+        }
+    </script>
+</body>
+</html> 

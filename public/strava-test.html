@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava Token Test - RUNNMATE</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .btn {
+            background: #f97316;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .btn:hover {
+            background: #ea580c;
+        }
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+        .error {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        .warning {
+            background: #fffbeb;
+            border: 2px solid #f59e0b;
+            color: #92400e;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .instructions {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            color: #0c4a6e;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .instructions ol {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏃‍♂️ Strava Token Test</h1>
+        <p class="subtitle">Test your Strava access and refresh tokens with RUNNMATE</p>
+        
+        <div class="warning">
+            <strong>⚠️ Security Notice:</strong> This is a development tool. Never share your tokens with others. Remove this file in production.
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Getting the Right Token:</h3>
+            <ol>
+                <li><strong>Option 1:</strong> <a href="https://developers.strava.com/playground/" target="_blank">Strava Playground</a>
+                    <br><small>• Make sure to check <strong>"View data about your activities"</strong> (activity:read scope)</small></li>
+                <li><strong>Option 2:</strong> Manual OAuth URL:
+                    <br><small>• <code>https://www.strava.com/oauth/authorize?client_id=YOUR_ID&response_type=code&redirect_uri=YOUR_URI&scope=read,activity:read</code></small></li>
+                <li>Run database migration (see STRAVA_INTEGRATION_SETUP.md)</li>
+                <li>Enter your tokens and email below</li>
+                <li>Visit <a href="/profile">/profile</a> after successful test</li>
+            </ol>
+        </div>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="accessToken">Strava Access Token *</label>
+                <textarea id="accessToken" rows="3" placeholder="Your Strava access token" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="refreshToken">Strava Refresh Token</label>
+                <textarea id="refreshToken" rows="3" placeholder="Your Strava refresh token (optional but recommended)"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="userEmail">Your Email *</label>
+                <input type="email" id="userEmail" placeholder="your.email@example.com" required>
+                <small style="color: #6b7280;">This will be used to save the verification to your account</small>
+            </div>
+
+            <button type="submit" class="btn" id="testBtn">Test Integration</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const accessToken = document.getElementById('accessToken').value.trim();
+            const refreshToken = document.getElementById('refreshToken').value.trim();
+            const userEmail = document.getElementById('userEmail').value.trim();
+            const resultDiv = document.getElementById('result');
+            const testBtn = document.getElementById('testBtn');
+
+            if (!accessToken || !userEmail) {
+                resultDiv.innerHTML = '<div class="result error">Please fill in required fields</div>';
+                return;
+            }
+
+            testBtn.disabled = true;
+            testBtn.textContent = 'Testing...';
+            resultDiv.innerHTML = '<div class="result">Testing Strava integration...</div>';
+
+            try {
+                const response = await fetch('/api/strava/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        accessToken,
+                        refreshToken,
+                        userEmail
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    let resultText = '';
+                    let resultClass = 'success';
+                    
+                    if (data.activities?.error) {
+                        resultClass = 'error';
+                        resultText += '⚠️  PARTIAL SUCCESS - Missing Permissions\n\n';
+                        resultText += `👤 Athlete: ${data.athlete.name} ✅\n`;
+                        resultText += `🏃 Activities: ❌ ${data.activities.error}\n\n`;
+                        
+                        if (data.activities.missingScope === 'activity:read') {
+                            resultText += '📋 TO FIX THIS:\n';
+                            resultText += '1. Go to: https://www.strava.com/oauth/authorize\n';
+                            resultText += '2. Add these parameters:\n';
+                            resultText += '   - client_id=YOUR_CLIENT_ID\n';
+                            resultText += '   - response_type=code\n';
+                            resultText += '   - redirect_uri=YOUR_REDIRECT_URI\n';
+                            resultText += '   - scope=read,activity:read\n';
+                            resultText += '3. Or use Strava Playground with activity:read scope\n\n';
+                        }
+                        
+                        if (data.database?.success) {
+                            resultText += '💾 Profile saved to database (without activity data)\n';
+                        }
+                    } else {
+                        resultText += '✅ SUCCESS! Strava integration working.\n\n';
+                        resultText += `👤 Athlete: ${data.athlete.name}\n`;
+                        resultText += `🏃 Total Activities: ${data.activities.total}\n`;
+                        resultText += `🏃‍♂️ Running Activities: ${data.activities.running}\n`;
+                        resultText += `📏 Total Distance: ${data.activities.totalDistanceKm} km\n\n`;
+                        
+                        if (data.activities.recentRuns && data.activities.recentRuns.length > 0) {
+                            resultText += '🏃 Recent Runs:\n';
+                            data.activities.recentRuns.forEach(run => {
+                                resultText += `  • ${run.name} - ${run.distance}km (${run.date.split('T')[0]})\n`;
+                            });
+                            resultText += '\n';
+                        }
+
+                        if (data.database) {
+                            if (data.database.success) {
+                                resultText += '💾 Database: Verification saved successfully!\n';
+                                resultText += '🔗 Next: Visit /profile to see your verification badge\n';
+                            } else {
+                                resultText += `❌ Database Error: ${data.database.error}\n`;
+                            }
+                        }
+                    }
+
+                    resultDiv.innerHTML = `<div class="result ${resultClass}">${resultText}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ ERROR: ${data.error}\n\n${data.details || ''}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Network Error: ${error.message}</div>`;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = 'Test Integration';
+            }
+        });
+    </script>
+</body>
+</html> 

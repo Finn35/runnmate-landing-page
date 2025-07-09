@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUNNMATE - Force Favicon Refresh</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .favicon-preview {
+            text-align: center;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .step {
+            background: #dbeafe;
+            border-left: 4px solid #2563EB;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #dcfce7;
+            border-left: 4px solid #16a34a;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        button {
+            background: #EA580C;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #dc2626;
+        }
+        .logo {
+            color: #2563EB;
+            font-weight: bold;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏃‍♂️ <span class="logo">RUNNMATE</span> Favicon Force Refresh</h1>
+        
+        <div class="favicon-preview">
+            <h2>New RUNNMATE Favicon:</h2>
+            <img id="faviconPreview" src="/runnmate-icon.svg" width="80" height="80" alt="RUNNMATE Favicon">
+            <p><strong>Bright orange circle with white "R"</strong></p>
+            <p>This is completely different from any other project!</p>
+        </div>
+
+        <div class="step">
+            <h3>🚀 Super Aggressive Cache Clearing:</h3>
+            <button onclick="forceRefreshFavicon()">🔄 Force Favicon Refresh</button>
+            <button onclick="clearAllCache()">🧹 Clear All Cache</button>
+            <button onclick="hardReload()">⚡ Hard Reload</button>
+        </div>
+
+        <div class="step">
+            <h3>📋 Manual Steps (If buttons don't work):</h3>
+            <ol>
+                <li><strong>Close ALL browser tabs</strong></li>
+                <li><strong>Close browser completely</strong></li>
+                <li><strong>Restart browser</strong></li>
+                <li><strong>Clear browsing data:</strong>
+                    <ul>
+                        <li>Chrome: Settings → Privacy → Clear Browsing Data</li>
+                        <li>Firefox: Settings → Privacy → Clear Data</li>
+                        <li>Edge: Settings → Privacy → Clear Data</li>
+                    </ul>
+                </li>
+                <li><strong>Visit homepage:</strong> <a href="/">http://localhost:3000</a></li>
+            </ol>
+        </div>
+
+        <div class="success" id="successMessage" style="display: none;">
+            <h3>✅ Favicon Updated Successfully!</h3>
+            <p>You should now see the bright orange "R" favicon in your browser tab.</p>
+        </div>
+
+        <hr style="margin: 30px 0;">
+        
+        <p><strong>Test URL:</strong> <a href="/">← Back to RUNNMATE Homepage</a></p>
+        <p><em>The new favicon should appear within 30 seconds to 2 minutes.</em></p>
+    </div>
+
+    <script>
+        let refreshCount = 0;
+
+        function forceRefreshFavicon() {
+            // Remove all existing favicon links
+            const existingLinks = document.querySelectorAll('link[rel*="icon"]');
+            existingLinks.forEach(link => link.remove());
+
+            // Create new favicon link with timestamp
+            const newLink = document.createElement('link');
+            newLink.rel = 'shortcut icon';
+            newLink.type = 'image/svg+xml';
+            newLink.href = `/runnmate-icon.svg?v=${Date.now()}`;
+            document.head.appendChild(newLink);
+
+            // Also update page favicon
+            const pageLink = document.createElement('link');
+            pageLink.rel = 'icon';
+            pageLink.type = 'image/svg+xml';
+            pageLink.href = `/runnmate-icon.svg?v=${Date.now()}`;
+            document.head.appendChild(pageLink);
+
+            refreshCount++;
+            updateStatus(`Favicon refreshed ${refreshCount} times`);
+        }
+
+        function clearAllCache() {
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            updateStatus("Cache cleared");
+        }
+
+        function hardReload() {
+            location.reload(true);
+        }
+
+        function updateStatus(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.style.display = 'block';
+            successDiv.innerHTML = `
+                <h3>🔄 ${message}</h3>
+                <p>Check your browser tab for the orange "R" icon.</p>
+            `;
+        }
+
+        // Auto-refresh favicon every 2 seconds for 30 seconds
+        let autoRefreshCount = 0;
+        const autoRefresh = setInterval(() => {
+            forceRefreshFavicon();
+            autoRefreshCount++;
+            
+            if (autoRefreshCount >= 15) { // 15 times = 30 seconds
+                clearInterval(autoRefresh);
+                updateStatus("Auto-refresh complete! Check your browser tab.");
+            }
+        }, 2000);
+
+        // Update favicon preview with timestamp
+        setInterval(() => {
+            const preview = document.getElementById('faviconPreview');
+            preview.src = `/runnmate-icon.svg?v=${Date.now()}`;
+        }, 5000);
+    </script>
+</body>
+</html> 

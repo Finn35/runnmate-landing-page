@@ -1,0 +1,15 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bright orange circle background -->
+  <circle cx="16" cy="16" r="15" fill="#EA580C" stroke="#2563EB" stroke-width="2"/>
+  
+  <!-- Large white "R" for RUNNMATE -->
+  <text x="16" y="23" font-family="Arial Black, Arial" font-size="20" font-weight="900" 
+        text-anchor="middle" fill="#FFFFFF">R</text>
+  
+  <!-- Small blue dot indicator -->
+  <circle cx="24" cy="8" r="3" fill="#2563EB"/>
+  <circle cx="24" cy="8" r="1.5" fill="#FFFFFF"/>
+  
+  <!-- Distinctive corner triangle -->
+  <polygon points="2,2 8,2 2,8" fill="#2563EB"/>
+</svg> 
