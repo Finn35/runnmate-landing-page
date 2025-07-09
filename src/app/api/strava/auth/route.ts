@@ -3,7 +3,13 @@ import config from '@/lib/config'
 
 export async function GET(request: NextRequest) {
   // Get the user's email or ID from search params to associate with the Strava account
-  const { searchParams } = new URL(request.url)
+  let searchParams;
+  try {
+    const url = new URL(request.url, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+    searchParams = url.searchParams;
+  } catch {
+    return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 });
+  }
   const userEmail = searchParams.get('user_email')
   
   // Strava OAuth configuration
