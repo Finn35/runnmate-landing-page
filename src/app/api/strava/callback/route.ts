@@ -23,7 +23,7 @@ interface StravaActivity {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
+  const { searchParams } = new URL(request.url, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
   const code = searchParams.get('code')
   const state = searchParams.get('state')
   const error = searchParams.get('error')
