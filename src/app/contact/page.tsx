@@ -257,7 +257,7 @@ export default function ContactPage() {
                 {t('contact.info.support')}
               </h3>
               <ul className="space-y-2">
-                {(t('contact.info.supportItems') as unknown as string[]).map((item: string, index: number) => (
+                {translations[language].contact.info.supportItems.map((item: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <span className="text-blue-600 mr-2">•</span>
                     <span className="text-gray-600">{item}</span>
