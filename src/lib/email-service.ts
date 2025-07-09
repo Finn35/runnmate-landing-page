@@ -22,12 +22,10 @@ export interface OfferEmailData {
   listingSize: number
 }
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 // Production email sender using Resend
 export async function sendEmail(emailData: EmailData): Promise<boolean> {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const result = await resend.emails.send({
       from: emailData.from || 'admin@runnmate.com',
       to: emailData.to,
