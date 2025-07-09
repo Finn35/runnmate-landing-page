@@ -73,7 +73,7 @@ export default function ContactPage() {
       } else {
         setError(t('contact.form.error'));
       }
-    } catch (err) {
+    } catch {
       setError(t('contact.form.error'));
     } finally {
       setIsSubmitting(false);
