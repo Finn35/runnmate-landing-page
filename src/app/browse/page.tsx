@@ -651,7 +651,9 @@ export default function BrowsePage() {
             >
               <option value="">{t('browse.filters.allSizes')}</option>
               {uniqueSizes.map(size => (
-                <option key={size} value={size}>{t('browse.filters.size', { size })}</option>
+                <option key={String(size)} value={String(size)}>
+                  {t('browse.filters.size', { size: String(size) })}
+                </option>
               ))}
             </select>
             {/* Brand Filter */}

@@ -1,15 +1,14 @@
+import { Resend } from 'resend'
+
 // Email service for sending notifications
-// This is a mock implementation. In production, integrate with:
-// - Resend (resend.com)
-// - SendGrid (sendgrid.com)
-// - Postmark (postmarkapp.com)
-// - AWS SES
+// Using Resend for production email sending
 
 export interface EmailData {
   to: string
   subject: string
   html: string
   from?: string
+  replyTo?: string
 }
 
 export interface OfferEmailData {
@@ -23,37 +22,26 @@ export interface OfferEmailData {
   listingSize: number
 }
 
-// Mock email sender (replace with real service in production)
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+// Production email sender using Resend
 export async function sendEmail(emailData: EmailData): Promise<boolean> {
-  // In production, use a real email service:
-  /*
-  // Example with Resend:
-  const resend = new Resend(process.env.RESEND_API_KEY)
-  
   try {
     const result = await resend.emails.send({
-      from: emailData.from || 'noreply@runnmate.com',
+      from: emailData.from || 'admin@runnmate.com',
       to: emailData.to,
       subject: emailData.subject,
-      html: emailData.html
+      html: emailData.html,
+      replyTo: emailData.replyTo || 'admin@runnmate.com'
     })
+    
+    console.log('✅ Email sent successfully:', result.data?.id)
     return true
   } catch (error) {
-    console.error('Failed to send email:', error)
+    console.error('❌ Failed to send email:', error)
     return false
   }
-  */
-
-  // Mock implementation - just log to console
-  console.log('📧 Email would be sent:')
-  console.log('To:', emailData.to)
-  console.log('Subject:', emailData.subject)
-  console.log('HTML:', emailData.html)
-  
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  return true
 }
 
 // Generate HTML email template for offer notifications
@@ -118,11 +106,15 @@ export function generateOfferEmailHtml(data: OfferEmailData): string {
             <p style="color: #6b7280; font-size: 14px;">
               💡 <strong>Tip:</strong> Respond quickly! Buyers are more likely to complete the purchase when sellers are responsive.
             </p>
+            <p style="color: #6b7280; font-size: 14px;">
+              📧 <strong>Need help?</strong> Reply to this email to reach our admin team at admin@runnmate.com
+            </p>
           </div>
         </div>
 
         <div class="footer">
           <p>You received this email because someone made an offer on your RUNNMATE listing.</p>
+          <p>Questions? Reply to this email or contact us at admin@runnmate.com</p>
           <p>© 2024 RUNNMATE - Connecting runners across Europe</p>
         </div>
       </div>
@@ -137,7 +129,54 @@ export async function sendOfferNotification(data: OfferEmailData): Promise<boole
     to: data.sellerEmail,
     subject: `💰 New €${data.offerPrice} offer on your ${data.listingTitle}`,
     html: generateOfferEmailHtml(data),
-    from: 'offers@runnmate.com'
+    from: 'admin@runnmate.com',
+    replyTo: 'admin@runnmate.com'
+  }
+
+  return await sendEmail(emailData)
+}
+
+// Send general admin/support email
+export async function sendAdminEmail(to: string, subject: string, message: string): Promise<boolean> {
+  const emailData: EmailData = {
+    to,
+    subject,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${subject}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f3f4f6; }
+          .container { max-width: 600px; margin: 0 auto; background-color: white; }
+          .header { background-color: #2563eb; color: white; padding: 24px; text-align: center; }
+          .content { padding: 24px; line-height: 1.6; }
+          .footer { background-color: #f9fafb; padding: 16px; text-align: center; color: #6b7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 style="margin: 0;">🏃‍♂️ RUNNMATE</h1>
+            <p style="margin: 8px 0 0 0;">${subject}</p>
+          </div>
+          
+          <div class="content">
+            <div style="white-space: pre-line;">${message}</div>
+          </div>
+
+          <div class="footer">
+            <p>Questions? Reply to this email or contact us at admin@runnmate.com</p>
+            <p>© 2024 RUNNMATE - Connecting runners across Europe</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    from: 'admin@runnmate.com',
+    replyTo: 'admin@runnmate.com'
   }
 
   return await sendEmail(emailData)

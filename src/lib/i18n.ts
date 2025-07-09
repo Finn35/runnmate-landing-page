@@ -266,6 +266,48 @@ export const translations = {
       edit: 'Edit'
     },
     
+    // Contact page
+    contact: {
+      title: 'Contact Us',
+      subtitle: 'Get in touch with the RUNNMATE team',
+      form: {
+        name: 'Full Name',
+        email: 'Email Address',
+        subject: 'Subject',
+        message: 'Message',
+        namePlaceholder: 'Your name',
+        emailPlaceholder: 'your.email@example.com',
+        subjectPlaceholder: 'What can we help you with?',
+        messagePlaceholder: 'Please describe your question or concern...',
+        send: 'Send Message',
+        sending: 'Sending...',
+        success: 'Message sent successfully!',
+        successSubtitle: 'We\'ll get back to you within 24 hours.',
+        error: 'Failed to send message. Please try again.',
+        nameRequired: 'Please enter your name',
+        emailRequired: 'Please enter your email address',
+        emailInvalid: 'Please enter a valid email address',
+        subjectRequired: 'Please enter a subject',
+        messageRequired: 'Please enter your message',
+        minMessageLength: 'Message must be at least 10 characters long'
+      },
+      info: {
+        title: 'Get in Touch',
+        subtitle: 'Have a question about buying or selling? Need help with your account? We\'re here to help!',
+        email: 'Email us directly',
+        emailAddress: 'admin@runnmate.com',
+        response: 'Response time: Usually within 24 hours',
+        support: 'What we can help with:',
+        supportItems: [
+          'Account questions',
+          'Buying and selling help',
+          'Technical issues',
+          'Community guidelines',
+          'Partnership inquiries'
+        ]
+      }
+    },
+
     // Footer
     footer: {
       description: 'Europe\'s leading marketplace for sustainable running shoes. Join our community of eco-conscious runners who believe in giving quality shoes a second life while saving money and protecting our planet.',
@@ -603,6 +645,48 @@ export const translations = {
       edit: 'Bewerken'
     },
     
+    // Contact page
+    contact: {
+      title: 'Contact Opnemen',
+      subtitle: 'Neem contact op met het RUNNMATE team',
+      form: {
+        name: 'Volledige Naam',
+        email: 'Email Adres',
+        subject: 'Onderwerp',
+        message: 'Bericht',
+        namePlaceholder: 'Je naam',
+        emailPlaceholder: 'jouw.email@example.com',
+        subjectPlaceholder: 'Waarmee kunnen we je helpen?',
+        messagePlaceholder: 'Beschrijf je vraag of probleem...',
+        send: 'Bericht Versturen',
+        sending: 'Versturen...',
+        success: 'Bericht succesvol verzonden!',
+        successSubtitle: 'We nemen binnen 24 uur contact met je op.',
+        error: 'Kon bericht niet versturen. Probeer opnieuw.',
+        nameRequired: 'Voer je naam in',
+        emailRequired: 'Voer je email adres in',
+        emailInvalid: 'Voer een geldig email adres in',
+        subjectRequired: 'Voer een onderwerp in',
+        messageRequired: 'Voer je bericht in',
+        minMessageLength: 'Bericht moet minimaal 10 tekens lang zijn'
+      },
+      info: {
+        title: 'Neem Contact Op',
+        subtitle: 'Heb je een vraag over kopen of verkopen? Hulp nodig met je account? We helpen je graag!',
+        email: 'Email ons direct',
+        emailAddress: 'admin@runnmate.com',
+        response: 'Reactietijd: Meestal binnen 24 uur',
+        support: 'Waarmee we kunnen helpen:',
+        supportItems: [
+          'Account vragen',
+          'Hulp bij kopen en verkopen',
+          'Technische problemen',
+          'Communityrichtlijnen',
+          'Partnership vragen'
+        ]
+      }
+    },
+
     // Footer
     footer: {
       description: 'Europa\'s toonaangevende marktplaats voor duurzame hardloopschoenen. Sluit je aan bij onze gemeenschap van milieubewuste hardlopers die geloven in het geven van kwaliteitsschoenen een tweede leven terwijl je geld bespaart en onze planeet beschermt.',

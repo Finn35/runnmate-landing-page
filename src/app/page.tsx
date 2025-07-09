@@ -486,7 +486,7 @@ export default function Home() {
                     </li>
                     <li>
                       <a 
-                        href="#" 
+                        href="/contact" 
                         className="text-gray-400 hover:text-white transition-colors text-sm"
                       >
                         {t('footer.contactUs')}
