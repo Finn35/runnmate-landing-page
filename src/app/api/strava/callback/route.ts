@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const safeUrl = typeof request.url === 'string' && request.url.startsWith('/') ? request.url : '/';
     const url = new URL(safeUrl, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
     searchParams = url.searchParams;
-  } catch (e) {
+  } catch {
     // If the URL is invalid (e.g. during static build), return a safe response
     return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 });
   }
