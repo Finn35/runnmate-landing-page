@@ -2,13 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
-  let url: URL | undefined;
-  try {
-    url = new URL(request.url, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
-  } catch {
-    // If the URL is invalid (e.g. during static build), use a dummy base
-    url = undefined;
-  }
   try {
     const { userEmail } = await request.json()
     
