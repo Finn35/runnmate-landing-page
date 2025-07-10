@@ -6,6 +6,16 @@ const missingVars = [];
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   missingVars.push('NEXT_PUBLIC_SUPABASE_URL');
+} else {
+  // Validate Supabase URL format
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL);
+    if (!url.hostname.includes('supabase.co')) {
+      throw new Error('Invalid Supabase URL format');
+    }
+  } catch (error) {
+    throw new Error(`Invalid NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}. Must be a valid URL like https://your-project.supabase.co`);
+  }
 }
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {

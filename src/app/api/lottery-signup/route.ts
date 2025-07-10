@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 
 interface LaunchNotification {
@@ -9,6 +8,11 @@ interface LaunchNotification {
   signed_up_at: string
   is_active: boolean
 }
+
+// Only import supabase client if we're not in build phase
+const supabase = process.env.NEXT_PHASE === 'phase-production-build' 
+  ? null 
+  : require('@/lib/supabase').supabase;
 
 export async function POST(request: NextRequest) {
   // Skip processing during build phase
@@ -26,7 +30,7 @@ export async function POST(request: NextRequest) {
     console.log('Processing lottery signup:', { email, lotteryConsent, shoeInterest })
 
     // Store the signup in database
-    const result = await supabase
+    const result = await supabase!
       .from('launch_notifications')
       .upsert([
         {
@@ -47,11 +51,6 @@ export async function POST(request: NextRequest) {
         details: result.error.message 
       }, { status: 500 })
     }
-
-    // TODO: In production, you might want to:
-    // 1. Send a confirmation email
-    // 2. Add to email marketing list (Resend, Mailchimp, etc.)
-    // 3. Track analytics event
 
     return NextResponse.json({ 
       success: true, 
