@@ -2,17 +2,55 @@ import { createClient } from '@supabase/supabase-js'
 
 // Create a dummy client for build time
 const createDummyClient = () => {
-  const dummyResponse = { data: null, error: null }
+  const dummyResponse = { data: null, error: null, count: 0 }
+  const chainMethods = {
+    select: () => ({ ...dummyResponse }),
+    insert: () => ({ ...dummyResponse }),
+    upsert: () => ({ ...dummyResponse }),
+    update: () => ({ ...dummyResponse }),
+    delete: () => ({ ...dummyResponse }),
+    eq: () => chainMethods,
+    neq: () => chainMethods,
+    gt: () => chainMethods,
+    gte: () => chainMethods,
+    lt: () => chainMethods,
+    lte: () => chainMethods,
+    like: () => chainMethods,
+    ilike: () => chainMethods,
+    is: () => chainMethods,
+    in: () => chainMethods,
+    contains: () => chainMethods,
+    containedBy: () => chainMethods,
+    range: () => chainMethods,
+    textSearch: () => chainMethods,
+    match: () => chainMethods,
+    not: () => chainMethods,
+    or: () => chainMethods,
+    filter: () => chainMethods,
+    order: () => chainMethods,
+    limit: () => chainMethods,
+    offset: () => chainMethods,
+    single: () => ({ ...dummyResponse }),
+    maybeSingle: () => ({ ...dummyResponse })
+  }
+
   return {
-    from: () => ({
-      select: () => ({ ...dummyResponse }),
-      insert: () => ({ ...dummyResponse }),
-      upsert: () => ({ ...dummyResponse }),
-      update: () => ({ ...dummyResponse }),
-      delete: () => ({ ...dummyResponse }),
-      eq: () => ({ ...dummyResponse }),
-      single: () => ({ ...dummyResponse })
-    })
+    from: () => chainMethods,
+    rpc: () => ({ ...dummyResponse }),
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+      signOut: () => Promise.resolve({ error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } }, error: null })
+    },
+    storage: {
+      from: () => ({
+        upload: () => Promise.resolve({ data: null, error: null }),
+        download: () => Promise.resolve({ data: null, error: null }),
+        remove: () => Promise.resolve({ data: null, error: null }),
+        list: () => Promise.resolve({ data: null, error: null })
+      })
+    }
   }
 }
 
