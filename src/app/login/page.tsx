@@ -7,6 +7,14 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import Link from 'next/link'
 
 function LoginForm() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginFormContent />
+    </Suspense>
+  )
+}
+
+function LoginFormContent() {
   const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -188,6 +196,14 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  )
+}
+
+function LoginPageContent() {
   const searchParams = useSearchParams()
   const message = searchParams.get('message')
   const distance = searchParams.get('distance')
