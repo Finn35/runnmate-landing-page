@@ -8,10 +8,23 @@ export async function GET(request: NextRequest) {
   if (buildTimeResponse) return buildTimeResponse
 
   try {
+    // Log environment for debugging
+    console.log('Environment check:', {
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+      hasClientId: !!process.env.STRAVA_CLIENT_ID,
+      hasClientSecret: !!process.env.STRAVA_CLIENT_SECRET
+    })
+
     // Get the authorization code and state from the URL
     const searchParams = new URL(request.url).searchParams
     const code = searchParams.get('code')
     const stateParam = searchParams.get('state')
+
+    console.log('Received params:', { 
+      hasCode: !!code,
+      stateParam,
+      fullUrl: request.url 
+    })
 
     if (!code) {
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=missing_code`)
@@ -21,11 +34,14 @@ export async function GET(request: NextRequest) {
     let state
     try {
       state = JSON.parse(decodeURIComponent(stateParam || '{}'))
-    } catch {
+      console.log('Parsed state:', state)
+    } catch (error) {
+      console.error('State parsing error:', error)
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=invalid_state`)
     }
 
     // Exchange the code for tokens
+    console.log('Attempting token exchange...')
     const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -38,15 +54,26 @@ export async function GET(request: NextRequest) {
     })
 
     const tokenData = await tokenResponse.json()
+    console.log('Token exchange response:', {
+      success: !!tokenData.access_token,
+      error: tokenData.error,
+      message: tokenData.message
+    })
+
     if (!tokenData.access_token) {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=token_exchange_failed`)
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=token_exchange_failed&reason=${encodeURIComponent(tokenData.message || 'unknown')}`)
     }
 
     // Get athlete data to verify it's a runner
+    console.log('Fetching athlete data...')
     const athleteResponse = await fetch('https://www.strava.com/api/v3/athlete', {
       headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
     })
     const athleteData = await athleteResponse.json()
+    console.log('Athlete data received:', {
+      hasEmail: !!athleteData.email,
+      id: athleteData.id
+    })
 
     // Get user's email from Strava or state
     const userEmail = state.email || athleteData.email
@@ -57,7 +84,10 @@ export async function GET(request: NextRequest) {
 
     // If user isn't authenticated, create a magic link account
     const { data: { session } } = await supabase.auth.getSession()
+    console.log('Auth check:', { hasSession: !!session })
+
     if (!session) {
+      console.log('Creating magic link for:', userEmail)
       const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
         email: userEmail,
         options: {
@@ -66,11 +96,13 @@ export async function GET(request: NextRequest) {
       })
 
       if (authError) {
+        console.error('Auth error:', authError)
         return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=auth_failed`)
       }
     }
 
     // Get athlete's running stats
+    console.log('Fetching athlete stats...')
     const statsResponse = await fetch('https://www.strava.com/api/v3/athletes/' + athleteData.id + '/stats', {
       headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
     })
@@ -82,7 +114,10 @@ export async function GET(request: NextRequest) {
       (statsData.recent_run_totals?.distance || 0)
     ) / 1000)
 
+    console.log('Stats calculated:', { totalDistanceKm })
+
     // Store verification in database
+    console.log('Storing verification data...')
     const { error: dbError } = await supabase
       .from('user_strava_verifications')
       .upsert({
@@ -106,6 +141,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=database_error`)
     }
 
+    console.log('Verification complete, redirecting...')
     // If user is already authenticated, redirect to profile with success
     if (session) {
       return NextResponse.redirect(
