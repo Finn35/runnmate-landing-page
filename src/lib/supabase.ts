@@ -1,21 +1,34 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Ensure we always have a valid URL during build and runtime
-const getSupabaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    return process.env.NEXT_PUBLIC_SUPABASE_URL
+// Create a dummy client for build time
+const createDummyClient = () => {
+  const dummyResponse = { data: null, error: null }
+  return {
+    from: () => ({
+      select: () => ({ ...dummyResponse }),
+      insert: () => ({ ...dummyResponse }),
+      upsert: () => ({ ...dummyResponse }),
+      update: () => ({ ...dummyResponse }),
+      delete: () => ({ ...dummyResponse }),
+      eq: () => ({ ...dummyResponse }),
+      single: () => ({ ...dummyResponse })
+    })
   }
-  // During build time, return a valid placeholder URL
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return 'https://placeholder-project.supabase.co'
-  }
-  return 'https://uydnxdxkjhrevyxajxya.supabase.co'
 }
 
-const supabaseUrl = getSupabaseUrl()
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZG54ZHhramhyZXZ5eGFqeHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2NDM4ODAsImV4cCI6MjA2NzIxOTg4MH0.zaTeT6o2pSIIqTnl7dRBRzflhncgW9OjgjCG3FwYTiQ'
+// Initialize Supabase client
+const initSupabase = () => {
+  // During build time, return a dummy client
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return createDummyClient()
+  }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uydnxdxkjhrevyxajxya.supabase.co'
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZG54ZHhramhyZXZ5eGFqeHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2NDM4ODAsImV4cCI6MjA2NzIxOTg4MH0.zaTeT6o2pSIIqTnl7dRBRzflhncgW9OjgjCG3FwYTiQ'
+  return createClient(supabaseUrl, supabaseAnonKey)
+}
+
+export const supabase = initSupabase()
 
 // Database types for TypeScript support
 export interface Listing {
