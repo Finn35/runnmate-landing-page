@@ -48,22 +48,15 @@ export default function StravaVerificationButton() {
   }
 
   const handleStravaConnect = async () => {
-    // Generate a unique state parameter
-    const state = encodeURIComponent(JSON.stringify({
-      timestamp: Date.now(),
-      email: session?.user?.email || null
-    }))
+    if (!session?.user?.email) {
+      // User not logged in, redirect to login
+      const currentPath = window.location.pathname + window.location.search
+      router.push(`/login?message=login_required&returnTo=${encodeURIComponent(currentPath)}`)
+      return
+    }
 
-    // Redirect to Strava OAuth directly
-    const stravaAuthUrl = `https://www.strava.com/oauth/authorize?` +
-      `client_id=${process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID}` +
-      `&response_type=code` +
-      `&redirect_uri=${process.env.NEXT_PUBLIC_SITE_URL}/api/strava/callback` +
-      `&approval_prompt=auto` +
-      `&scope=read,activity:read` +
-      `&state=${state}`
-
-    window.location.href = stravaAuthUrl
+    // Use our auth route instead of going directly to Strava
+    window.location.href = `/api/strava/auth?user_email=${encodeURIComponent(session.user.email)}`
   }
 
   if (isLoading) {
