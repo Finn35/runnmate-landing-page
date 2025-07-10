@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const buildTimeResponse = handleBuildTimeRequest()
   if (buildTimeResponse) return buildTimeResponse
 
-  // Get the user's email or ID from search params to associate with the Strava account
+  // Get the user's email from search params
   let searchParams;
   try {
     const url = new URL(request.url, config.baseUrl);
@@ -16,6 +16,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 });
   }
   const userEmail = searchParams.get('user_email')
+
+  if (!userEmail) {
+    console.error('Missing user_email parameter')
+    return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=missing_email`)
+  }
   
   // Strava OAuth configuration
   const stravaClientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || process.env.STRAVA_CLIENT_ID
@@ -25,20 +30,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Strava OAuth not configured' }, { status: 500 })
   }
   
-  // Generate state parameter for security (include user email)
+  // Generate state parameter with user email
   const state = JSON.stringify({ 
-    userEmail,
-    timestamp: Date.now(),
-    nonce: Math.random().toString(36).substring(7)
+    email: userEmail, // Use 'email' key to match callback expectations
+    timestamp: Date.now()
   })
   
-  // Strava OAuth authorization URL - uses environment-aware redirect URI
+  // Strava OAuth authorization URL with required scopes
   const authUrl = new URL('https://www.strava.com/oauth/authorize')
   authUrl.searchParams.set('client_id', stravaClientId)
-  authUrl.searchParams.set('redirect_uri', config.stravaRedirectUri) // Environment-aware
+  authUrl.searchParams.set('redirect_uri', config.stravaRedirectUri)
   authUrl.searchParams.set('response_type', 'code')
-  authUrl.searchParams.set('scope', 'read,activity:read')
-  authUrl.searchParams.set('state', state) // No need to encode twice
+  authUrl.searchParams.set('scope', 'read,activity:read,profile:read_all')
+  authUrl.searchParams.set('state', state)
+  authUrl.searchParams.set('approval_prompt', 'auto')
   
   return NextResponse.redirect(authUrl.toString())
 } 

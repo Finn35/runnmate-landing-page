@@ -68,7 +68,7 @@ export function generateOfferEmailHtml(data: OfferEmailData): string {
     <body>
       <div class="container">
         <div class="header">
-          <h1 style="margin: 0;">🏃‍♂️ RUNNMATE</h1>
+          <h1 style="margin: 0;">🏃‍♂️ Runnmate</h1>
           <p style="margin: 8px 0 0 0;">New Offer on Your Running Shoes!</p>
         </div>
         
@@ -111,9 +111,9 @@ export function generateOfferEmailHtml(data: OfferEmailData): string {
         </div>
 
         <div class="footer">
-          <p>You received this email because someone made an offer on your RUNNMATE listing.</p>
+          <p>You received this email because someone made an offer on your Runnmate listing.</p>
           <p>Questions? Reply to this email or contact us at admin@runnmate.com</p>
-          <p>© 2024 RUNNMATE - Connecting runners across Europe</p>
+          <p>© 2024 Runnmate - Connecting runners across Europe</p>
         </div>
       </div>
     </body>
@@ -157,7 +157,7 @@ export async function sendAdminEmail(to: string, subject: string, message: strin
       <body>
         <div class="container">
           <div class="header">
-            <h1 style="margin: 0;">🏃‍♂️ RUNNMATE</h1>
+            <h1 style="margin: 0;">🏃‍♂️ Runnmate</h1>
             <p style="margin: 8px 0 0 0;">${subject}</p>
           </div>
           
@@ -167,7 +167,7 @@ export async function sendAdminEmail(to: string, subject: string, message: strin
 
           <div class="footer">
             <p>Questions? Reply to this email or contact us at admin@runnmate.com</p>
-            <p>© 2024 RUNNMATE - Connecting runners across Europe</p>
+            <p>© 2024 Runnmate - Connecting runners across Europe</p>
           </div>
         </div>
       </body>
@@ -227,3 +227,40 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
   }
 }
 */ 
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+interface VerificationEmailData {
+  name: string
+  totalDistance: number
+}
+
+export async function sendVerificationEmail(email: string, data: VerificationEmailData) {
+  try {
+    await resend.emails.send({
+      from: 'Runnmate <verification@runnmate.com>',
+      to: email,
+      subject: 'Strava Account Connected Successfully',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Strava Account Connected!</h2>
+          <p>Hi ${data.name},</p>
+          <p>Your Strava account has been successfully connected to Runnmate. We've verified your running history:</p>
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>Total Distance:</strong> ${data.totalDistance} km</p>
+          </div>
+          <p>You can now use all Runnmate features that require Strava verification.</p>
+          <p>Happy running!</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="color: #666; font-size: 12px;">
+            This email was sent by Runnmate. If you didn't connect your Strava account, please contact us.
+          </p>
+        </div>
+      `
+    })
+    return true
+  } catch (error) {
+    console.error('Failed to send verification email:', error)
+    return false
+  }
+} 

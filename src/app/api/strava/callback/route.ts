@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { handleBuildTimeRequest } from '@/lib/strava'
+import { sendVerificationEmail } from '@/lib/email-service'
+import config from '@/lib/config'
 
 export async function GET(request: NextRequest) {
   // Skip during build time
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (!code) {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=missing_code`)
+      return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=missing_code`)
     }
 
     // Parse state parameter
@@ -37,7 +39,12 @@ export async function GET(request: NextRequest) {
       console.log('Parsed state:', state)
     } catch (error) {
       console.error('State parsing error:', error)
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=invalid_state`)
+      return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=invalid_state`)
+    }
+
+    // Check for email in state
+    if (!state.email) {
+      return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=missing_email`)
     }
 
     // Exchange the code for tokens
@@ -61,7 +68,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (!tokenData.access_token) {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=token_exchange_failed&reason=${encodeURIComponent(tokenData.message || 'unknown')}`)
+      return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=token_exchange_failed&reason=${encodeURIComponent(tokenData.message || 'unknown')}`)
     }
 
     // Get athlete data to verify it's a runner
@@ -74,32 +81,6 @@ export async function GET(request: NextRequest) {
       hasEmail: !!athleteData.email,
       id: athleteData.id
     })
-
-    // Get user's email from Strava or state
-    const userEmail = state.email || athleteData.email
-
-    if (!userEmail) {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=no_email_found`)
-    }
-
-    // If user isn't authenticated, create a magic link account
-    const { data: { session } } = await supabase.auth.getSession()
-    console.log('Auth check:', { hasSession: !!session })
-
-    if (!session) {
-      console.log('Creating magic link for:', userEmail)
-      const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
-        email: userEmail,
-        options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?strava_success=true`
-        }
-      })
-
-      if (authError) {
-        console.error('Auth error:', authError)
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=auth_failed`)
-      }
-    }
 
     // Get athlete's running stats
     console.log('Fetching athlete stats...')
@@ -121,7 +102,7 @@ export async function GET(request: NextRequest) {
     const { error: dbError } = await supabase
       .from('user_strava_verifications')
       .upsert({
-        user_email: userEmail,
+        user_email: state.email,
         strava_athlete_id: athleteData.id,
         strava_athlete_name: `${athleteData.firstname} ${athleteData.lastname}`,
         access_token: tokenData.access_token,
@@ -138,24 +119,22 @@ export async function GET(request: NextRequest) {
 
     if (dbError) {
       console.error('Database error:', dbError)
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=database_error`)
+      return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=database_error`)
     }
+
+    // Send verification email using Resend
+    await sendVerificationEmail(state.email, {
+      name: `${athleteData.firstname} ${athleteData.lastname}`,
+      totalDistance: totalDistanceKm
+    })
 
     console.log('Verification complete, redirecting...')
-    // If user is already authenticated, redirect to profile with success
-    if (session) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_success=true&distance=${totalDistanceKm}`
-      )
-    }
-
-    // Otherwise, show message about magic link email
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/login?message=check_email_strava_connected&distance=${totalDistanceKm}`
+      `${config.baseUrl}/profile?strava_success=true&distance=${totalDistanceKm}`
     )
 
   } catch (error) {
     console.error('Strava callback error:', error)
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/profile?strava_error=unknown_error`)
+    return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=unknown_error`)
   }
 } 
