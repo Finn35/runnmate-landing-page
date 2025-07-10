@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { NextResponse } from 'next/server'
 
 interface StravaApiOptions {
   userEmail: string
@@ -11,6 +12,16 @@ interface StravaTokens {
   access_token: string
   refresh_token: string
   token_expires_at: string
+}
+
+/**
+ * Helper function to handle build-time API route requests
+ */
+export function handleBuildTimeRequest() {
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json({ message: 'Skipped during build phase' })
+  }
+  return null
 }
 
 /**

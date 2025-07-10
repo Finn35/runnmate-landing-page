@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { handleBuildTimeRequest } from '@/lib/strava'
 
 interface StravaTokenResponse {
   access_token: string
@@ -24,9 +25,8 @@ interface StravaActivity {
 
 export async function GET(request: NextRequest) {
   // Skip during build time
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return new Response(null, { status: 200 });
-  }
+  const buildTimeResponse = handleBuildTimeRequest()
+  if (buildTimeResponse) return buildTimeResponse
 
   let searchParams;
   try {

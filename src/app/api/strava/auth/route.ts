@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import config from '@/lib/config'
+import { handleBuildTimeRequest } from '@/lib/strava'
 
 export async function GET(request: NextRequest) {
+  // Skip during build time
+  const buildTimeResponse = handleBuildTimeRequest()
+  if (buildTimeResponse) return buildTimeResponse
+
   // Get the user's email or ID from search params to associate with the Strava account
   let searchParams;
   try {

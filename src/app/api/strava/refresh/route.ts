@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { handleBuildTimeRequest } from '@/lib/strava'
 
 export async function POST(request: NextRequest) {
   // Skip during build time
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return new Response(null, { status: 200 });
-  }
+  const buildTimeResponse = handleBuildTimeRequest()
+  if (buildTimeResponse) return buildTimeResponse
 
   try {
     const { userEmail } = await request.json()
