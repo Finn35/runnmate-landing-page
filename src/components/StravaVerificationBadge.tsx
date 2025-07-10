@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 interface StravaVerification {
   strava_athlete_name: string
@@ -15,15 +16,19 @@ interface StravaVerificationBadgeProps {
   userEmail?: string
   variant?: 'compact' | 'detailed'
   className?: string
+  showConnectButton?: boolean
 }
 
 export default function StravaVerificationBadge({ 
   userEmail, 
   variant = 'compact',
-  className = '' 
+  className = '',
+  showConnectButton = false
 }: StravaVerificationBadgeProps) {
+  const router = useRouter()
   const [verification, setVerification] = useState<StravaVerification | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isConnecting, setIsConnecting] = useState(false)
 
   useEffect(() => {
     if (!userEmail) {
@@ -35,7 +40,7 @@ export default function StravaVerificationBadge({
   }, [userEmail])
 
   const loadVerification = async () => {
-    if (!userEmail) return
+    if (typeof userEmail !== 'string') return
 
     try {
       const { data, error } = await supabase
@@ -55,11 +60,60 @@ export default function StravaVerificationBadge({
     }
   }
 
+  const handleConnect = async () => {
+    setIsConnecting(true)
+    try {
+      // Check if user is logged in
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // Not logged in - redirect to login with returnTo
+        const currentPath = window.location.pathname + window.location.search
+        router.push(`/login?message=login_required&returnTo=${encodeURIComponent(currentPath)}`)
+        return
+      }
+
+      // User is logged in - redirect to Strava auth
+      window.location.href = `/api/strava/auth?user_email=${encodeURIComponent(session.user.email)}`
+    } catch (error) {
+      console.error('Error connecting to Strava:', error)
+    } finally {
+      setIsConnecting(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className={`animate-pulse ${className}`}>
         <div className="h-6 bg-gray-200 rounded w-24"></div>
       </div>
+    )
+  }
+
+  if (!verification && showConnectButton) {
+    return (
+      <button
+        onClick={handleConnect}
+        disabled={isConnecting}
+        className={`inline-flex items-center space-x-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow transition-colors ${className}`}
+      >
+        {isConnecting ? (
+          <>
+            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            <span>Connecting...</span>
+          </>
+        ) : (
+          <>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.599h4.172L10.463 0l-7 13.828h4.169"/>
+            </svg>
+            <span>Connect Strava</span>
+          </>
+        )}
+      </button>
     )
   }
 

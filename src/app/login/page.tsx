@@ -21,6 +21,7 @@ function LoginFormContent() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const searchParams = useSearchParams()
+  const returnTo = searchParams.get('returnTo')
 
   // Handle URL error parameters
   useEffect(() => {
@@ -43,12 +44,12 @@ function LoginFormContent() {
       }
     }
     
-    if (urlMessage === 'login_to_make_offer') {
+    if (urlMessage === 'login_required') {
+      setMessage('To connect your Strava account, we first need to create your RUNNMATE account. This helps us maintain a trusted community of runners. After logging in, you\'ll be automatically redirected to complete your Strava verification.')
+    } else if (urlMessage === 'login_to_make_offer') {
       setMessage(t('login.messages.loginToMakeOffer'))
     } else if (urlMessage === 'login_to_buy') {
       setMessage(t('login.messages.loginToBuy'))
-    } else if (urlMessage === 'strava_verification_requires_login') {
-      setMessage('To verify your running history with Strava, we first need to create your RUNNMATE account. This helps us maintain a trusted community of runners. After logging in, you\'ll be automatically redirected to complete your Strava verification.')
     }
   }, [searchParams, t])
 
@@ -78,10 +79,16 @@ function LoginFormContent() {
     setIsLoading(true)
 
     try {
+      // Preserve returnTo in redirect URL
+      const redirectParams = new URLSearchParams(searchParams.toString())
+      if (returnTo) {
+        redirectParams.set('returnTo', returnTo)
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?${searchParams.toString()}`
+          emailRedirectTo: `${window.location.origin}/auth/callback?${redirectParams.toString()}`
         }
       })
 

@@ -40,32 +40,18 @@ export default function AuthCallback() {
           setStep('redirecting')
           await new Promise(resolve => setTimeout(resolve, 800))
           
-          // Check if we need to continue with Strava verification
+          // Check URL parameters
           const searchParams = new URLSearchParams(window.location.search)
-          if (searchParams.get('message') === 'strava_verification_requires_login') {
-            // Initiate Strava verification
-            const state = encodeURIComponent(JSON.stringify({
-              userEmail: data.user?.email,
-              timestamp: Date.now()
-            }))
+          const returnTo = searchParams.get('returnTo')
+          const message = searchParams.get('message')
 
-            const stravaAuthUrl = `https://www.strava.com/oauth/authorize?` +
-              `client_id=${process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID}` +
-              `&response_type=code` +
-              `&redirect_uri=${process.env.NEXT_PUBLIC_SITE_URL}/api/strava/callback` +
-              `&approval_prompt=auto` +
-              `&scope=read,activity:read` +
-              `&state=${state}`
-
-            window.location.href = stravaAuthUrl
-            return
-          }
-          
-          // Check for redirect URL in sessionStorage (set when redirecting to login)
-          const redirectUrl = sessionStorage.getItem('auth_redirect')
-          if (redirectUrl) {
-            sessionStorage.removeItem('auth_redirect')
-            router.push(redirectUrl)
+          // Handle different redirect scenarios
+          if (message === 'login_required' && returnTo) {
+            // User was trying to connect Strava, redirect back
+            router.push(returnTo)
+          } else if (returnTo) {
+            // General returnTo URL
+            router.push(returnTo)
           } else {
             // Default redirect to browse page
             router.push('/browse')
