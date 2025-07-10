@@ -17,12 +17,16 @@ const createDummyClient = () => {
         const response = options?.count 
           ? { ...baseResponse, count: 0 }
           : { ...baseResponse }
-        return { ...methods, ...response }
+
+        // Create a Promise-like object that is also thenable
+        const result = Promise.resolve(response)
+        Object.assign(result, methods)
+        return result
       },
-      insert: () => ({ ...baseResponse }),
-      upsert: () => ({ ...baseResponse }),
-      update: () => ({ ...baseResponse }),
-      delete: () => ({ ...baseResponse }),
+      insert: () => Promise.resolve({ ...baseResponse }),
+      upsert: () => Promise.resolve({ ...baseResponse }),
+      update: () => Promise.resolve({ ...baseResponse }),
+      delete: () => Promise.resolve({ ...baseResponse }),
       eq: () => methods,
       neq: () => methods,
       gt: () => methods,
@@ -44,10 +48,8 @@ const createDummyClient = () => {
       order: () => methods,
       limit: () => methods,
       offset: () => methods,
-      single: () => ({ ...baseResponse }),
-      maybeSingle: () => ({ ...baseResponse }),
-      then: (onfulfilled?: any) => Promise.resolve(baseResponse).then(onfulfilled),
-      catch: (onrejected?: any) => Promise.resolve(baseResponse).catch(onrejected)
+      single: () => Promise.resolve({ ...baseResponse }),
+      maybeSingle: () => Promise.resolve({ ...baseResponse })
     }
 
     return methods
@@ -55,7 +57,7 @@ const createDummyClient = () => {
 
   return {
     from: () => createChainMethods(),
-    rpc: () => ({ ...baseResponse }),
+    rpc: () => Promise.resolve({ ...baseResponse }),
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       getUser: () => Promise.resolve({ data: { user: null }, error: null }),
