@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: "Terms of service - RUNNMATE",
-  description: "Read RUNNMATE&apos;s terms of service. We&apos;re a community platform connecting runners - no payments, just direct user-to-user transactions.",
+  title: "Terms of service - Runnmate",
+  description: "Read Runnmate's terms of service. We're a community platform connecting runners - no payments, just direct user-to-user transactions.",
   robots: {
     index: true,
     follow: true,
@@ -23,22 +23,22 @@ export default function TermsOfServicePage() {
 
           <div className="prose prose-gray max-w-none">
             <p className="text-lg text-gray-700 mb-6">
-              Welcome to RUNNMATE. By using our platform (the &quot;Platform&quot;), you agree to the following terms and conditions:
+              Welcome to Runnmate. By using our platform (the &quot;Platform&quot;), you agree to the following terms and conditions:
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Platform Use</h2>
             <p className="text-gray-700 mb-6">
-              RUNNMATE is a community-driven platform that enables users to list and discover second-hand running shoes. We do not facilitate payments, delivery, or legal transactions. All communication and potential transactions occur directly between users.
+              Runnmate is a community-driven platform that enables users to list and discover second-hand running shoes. We do not facilitate payments, delivery, or legal transactions. All communication and potential transactions occur directly between users.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">2. No Commercial Responsibility</h2>
             <p className="text-gray-700 mb-6">
-              RUNNMATE is not a party to any sales or agreements between users. We do not hold or transfer money, guarantee delivery, or offer refunds or mediation.
+              Runnmate is not a party to any sales or agreements between users. We do not hold or transfer money, guarantee delivery, or offer refunds or mediation.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">3. Listings</h2>
             <p className="text-gray-700 mb-6">
-              All listings must be honest and accurate. Users are responsible for the content and condition of the items they list. RUNNMATE reserves the right to remove any content that violates guidelines or local laws.
+              All listings must be honest and accurate. Users are responsible for the content and condition of the items they list. Runnmate reserves the right to remove any content that violates guidelines or local laws.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">4. User Authentication</h2>
@@ -53,7 +53,7 @@ export default function TermsOfServicePage() {
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">6. Liability</h2>
             <p className="text-gray-700 mb-6">
-              RUNNMATE is not liable for any issues arising from use of the Platform. Use at your own risk. We are not responsible for damaged goods, fraud, or missed communications between users.
+              Runnmate is not liable for any issues arising from use of the Platform. Use at your own risk. We are not responsible for damaged goods, fraud, or missed communications between users.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">7. Platform Evolution</h2>

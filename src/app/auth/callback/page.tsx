@@ -109,7 +109,7 @@ export default function AuthCallback() {
           title: 'Success! 🎉',
           subtitle: new URLSearchParams(window.location.search).get('message') === 'strava_verification_requires_login'
             ? 'Now connecting to Strava...'
-            : 'You\'re now signed in to RUNNMATE',
+            : 'You\'re now signed in to Runnmate',
           bgColor: 'bg-green-100'
         }
       case 'redirecting':
@@ -140,11 +140,9 @@ export default function AuthCallback() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* RUNNMATE Logo */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-3">
-            <Image src="/runnmate-logo.svg" alt="RUNNMATE" className="h-10" width={40} height={40} />
-          </div>
+        {/* Runnmate Logo */}
+        <div className="flex items-center justify-center mb-8">
+          <Image src="/runnmate-logo.svg" alt="Runnmate" className="h-10" width={40} height={40} />
         </div>
 
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-xl sm:px-10 border border-gray-200">

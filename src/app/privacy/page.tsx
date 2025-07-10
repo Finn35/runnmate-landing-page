@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: "Privacy policy - RUNNMATE",
-  description: "Learn how RUNNMATE protects your privacy. We collect minimal data (email only) and never share your information with third parties.",
+  title: "Privacy policy - Runnmate",
+  description: "Learn how Runnmate protects your privacy. We collect minimal data (email only) and never share your information with third parties.",
   robots: {
     index: true,
     follow: true,
@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
 
           <div className="prose prose-gray max-w-none">
             <p className="text-lg text-gray-700 mb-6">
-              At RUNNMATE, your privacy matters. This Privacy Policy explains how we collect, store, and use your personal data when you use our platform (the &quot;Platform&quot;).
+              At Runnmate, your privacy matters. This Privacy Policy explains how we collect, store, and use your personal data when you use our platform (the &quot;Platform&quot;).
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Data We Collect</h2>

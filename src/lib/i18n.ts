@@ -272,7 +272,7 @@ export const translations = {
     // Contact page
     contact: {
       title: 'Contact Us',
-      subtitle: 'Get in touch with the RUNNMATE team',
+      subtitle: 'Get in touch with the Runnmate team',
       form: {
         name: 'Full Name',
         email: 'Email Address',
@@ -319,7 +319,7 @@ export const translations = {
       contactUs: 'Contact Us',
       privacyPolicy: 'Privacy Policy',
       termsOfService: 'Terms of Service',
-      copyright: '© 2024 RunnMate. All rights reserved. Made with ❤️ for sustainable running.'
+      copyright: '© 2024 Runnmate. All rights reserved. Made with ❤️ for sustainable running.'
     },
     
     // Listing detail page
@@ -653,7 +653,7 @@ export const translations = {
     // Contact page
     contact: {
       title: 'Contact Opnemen',
-      subtitle: 'Neem contact op met het RUNNMATE team',
+      subtitle: 'Neem contact op met het Runnmate team',
       form: {
         name: 'Volledige Naam',
         email: 'Email Adres',
@@ -700,7 +700,7 @@ export const translations = {
       contactUs: 'Contact Opnemen',
       privacyPolicy: 'Privacybeleid',
       termsOfService: 'Algemene Voorwaarden',
-      copyright: '© 2024 RunnMate. Alle rechten voorbehouden. Gemaakt met ❤️ voor duurzaam hardlopen.'
+      copyright: '© 2024 Runnmate. Alle rechten voorbehouden. Gemaakt met ❤️ voor duurzaam hardlopen.'
     },
     
     // Listing detail page

@@ -1,5 +1,24 @@
 import { Resend } from 'resend'
 
+// Only initialize Resend on the server-side
+const getResendClient = () => {
+  if (typeof window !== 'undefined') {
+    throw new Error('Resend client can only be used on the server-side')
+  }
+  
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is not set')
+  }
+  
+  return new Resend(apiKey)
+}
+
+interface VerificationEmailData {
+  name: string
+  totalDistance: number
+}
+
 // Email service for sending notifications
 // Using Resend for production email sending
 
@@ -135,49 +154,23 @@ export async function sendOfferNotification(data: OfferEmailData): Promise<boole
 }
 
 // Send general admin/support email
-export async function sendAdminEmail(to: string, subject: string, message: string): Promise<boolean> {
-  const emailData: EmailData = {
-    to,
-    subject,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${subject}</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f3f4f6; }
-          .container { max-width: 600px; margin: 0 auto; background-color: white; }
-          .header { background-color: #2563eb; color: white; padding: 24px; text-align: center; }
-          .content { padding: 24px; line-height: 1.6; }
-          .footer { background-color: #f9fafb; padding: 16px; text-align: center; color: #6b7280; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1 style="margin: 0;">🏃‍♂️ Runnmate</h1>
-            <p style="margin: 8px 0 0 0;">${subject}</p>
-          </div>
-          
-          <div class="content">
-            <div style="white-space: pre-line;">${message}</div>
-          </div>
-
-          <div class="footer">
-            <p>Questions? Reply to this email or contact us at admin@runnmate.com</p>
-            <p>© 2024 Runnmate - Connecting runners across Europe</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
-    from: 'admin@runnmate.com',
-    replyTo: 'admin@runnmate.com'
+export async function sendAdminEmail(to: string, subject: string, htmlContent: string) {
+  try {
+    const resend = getResendClient()
+    
+    const result = await resend.emails.send({
+      from: 'Runnmate <admin@runnmate.com>',
+      to,
+      subject,
+      html: htmlContent
+    })
+    
+    console.log('Admin email sent successfully:', result)
+    return true
+  } catch (error) {
+    console.error('Failed to send admin email:', error)
+    return false
   }
-
-  return await sendEmail(emailData)
 }
 
 // Integration examples for popular email services:
@@ -228,16 +221,11 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
 }
 */ 
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
-interface VerificationEmailData {
-  name: string
-  totalDistance: number
-}
-
 export async function sendVerificationEmail(email: string, data: VerificationEmailData) {
   try {
-    await resend.emails.send({
+    const resend = getResendClient()
+    
+    const result = await resend.emails.send({
       from: 'Runnmate <verification@runnmate.com>',
       to: email,
       subject: 'Strava Account Connected Successfully',
@@ -247,17 +235,17 @@ export async function sendVerificationEmail(email: string, data: VerificationEma
           <p>Hi ${data.name},</p>
           <p>Your Strava account has been successfully connected to Runnmate. We've verified your running history:</p>
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 0;"><strong>Total Distance:</strong> ${data.totalDistance} km</p>
+            <p style="margin: 0; font-size: 18px; color: #2563eb;">
+              <strong>Total Distance: ${data.totalDistance} km</strong>
+            </p>
           </div>
-          <p>You can now use all Runnmate features that require Strava verification.</p>
-          <p>Happy running!</p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="color: #666; font-size: 12px;">
-            This email was sent by Runnmate. If you didn't connect your Strava account, please contact us.
-          </p>
+          <p>You can now use your verified runner status on Runnmate!</p>
+          <p>Best regards,<br>The Runnmate Team</p>
         </div>
       `
     })
+    
+    console.log('Verification email sent successfully:', result)
     return true
   } catch (error) {
     console.error('Failed to send verification email:', error)

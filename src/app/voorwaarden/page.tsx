@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: "Algemene voorwaarden - RUNNMATE",
-  description: "Lees RUNNMATE&apos;s algemene voorwaarden. We zijn een community platform voor hardlopers - geen betalingen, alleen directe gebruiker-tot-gebruiker transacties.",
+  title: "Algemene voorwaarden - Runnmate",
+  description: "Lees Runnmate's algemene voorwaarden. We zijn een community platform voor hardlopers - geen betalingen, alleen directe gebruiker-tot-gebruiker transacties.",
   robots: {
     index: true,
     follow: true,
@@ -23,22 +23,22 @@ export default function VoorwaardenPage() {
 
           <div className="prose prose-gray max-w-none">
             <p className="text-lg text-gray-700 mb-6">
-              Welkom bij RUNNMATE. Door onze platform te gebruiken, ga je akkoord met de volgende voorwaarden:
+              Welkom bij Runnmate. Door onze platform te gebruiken, ga je akkoord met de volgende voorwaarden:
             </p>
 
-            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Gebruik van het platform</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Platform Gebruik</h2>
             <p className="text-gray-700 mb-6">
-              RUNNMATE is een community-gericht platform waar gebruikers tweedehands hardloopschoenen kunnen aanbieden of ontdekken. Wij faciliteren geen betalingen, leveringen of juridische transacties. Alle communicatie en eventuele transacties gebeuren direct tussen gebruikers.
+              Runnmate is een community-gericht platform waar gebruikers tweedehands hardloopschoenen kunnen aanbieden of ontdekken. Wij faciliteren geen betalingen, leveringen of juridische transacties. Alle communicatie en transacties vinden direct plaats tussen gebruikers.
             </p>
 
-            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">2. Geen commerciële verantwoordelijkheid</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">2. Geen Commerciële Verantwoordelijkheid</h2>
             <p className="text-gray-700 mb-6">
-              RUNNMATE is geen partij bij de verkoop of afspraken tussen gebruikers. Wij houden geen geld vast, faciliteren geen betalingen en bieden geen garantie of terugbetaling.
+              Runnmate is geen partij bij de verkoop of afspraken tussen gebruikers. Wij houden geen geld vast, faciliteren geen betalingen en bieden geen garantie of terugbetaling.
             </p>
 
-            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">3. Advertenties</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">3. Aanbiedingen</h2>
             <p className="text-gray-700 mb-6">
-              Alle advertenties moeten eerlijk en accuraat zijn. Gebruikers zijn zelf verantwoordelijk voor de inhoud en staat van hun aangeboden items. RUNNMATE behoudt zich het recht voor om content te verwijderen die niet aan de richtlijnen of lokale wetten voldoet.
+              Alle aanbiedingen moeten eerlijk en accuraat zijn. Gebruikers zijn verantwoordelijk voor de inhoud en staat van hun aangeboden items. Runnmate behoudt zich het recht voor om content te verwijderen die niet aan de richtlijnen of lokale wetten voldoet.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">4. Gebruikersauthenticatie</h2>
@@ -53,7 +53,7 @@ export default function VoorwaardenPage() {
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">6. Aansprakelijkheid</h2>
             <p className="text-gray-700 mb-6">
-              RUNNMATE is niet aansprakelijk voor problemen voortvloeiend uit het gebruik van het platform. Gebruik is op eigen risico. Wij zijn niet verantwoordelijk voor beschadigde goederen, fraude of miscommunicatie tussen gebruikers.
+              Runnmate is niet aansprakelijk voor problemen voortvloeiend uit het gebruik van het platform. Gebruik is op eigen risico. Wij zijn niet verantwoordelijk voor beschadigde goederen, fraude of miscommunicatie tussen gebruikers.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">7. Evolutie van het platform</h2>

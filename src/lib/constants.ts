@@ -1,7 +1,7 @@
 // Text content for easy internationalization later
 export const SITE_CONTENT = {
   // Meta
-  siteTitle: "RUNNMATE",
+  siteTitle: "Runnmate",
   siteDescription: "Netherlands' trusted marketplace for premium second-hand running shoes. Hygiene guaranteed, mileage verified.",
   
   // Trust signals
@@ -142,7 +142,7 @@ export const SITE_CONTENT = {
         links: ["About Us", "Privacy Policy", "Terms of Service", "Blog"]
       }
     },
-    copyright: "© 2024 RUNNMATE. All rights reserved. 🇳🇱 Made in Netherlands",
+    copyright: "© 2024 Runnmate. All rights reserved. 🇳🇱 Made in Netherlands",
     tagline: "Built with love ❤️ by runners, for runners."
   }
 };

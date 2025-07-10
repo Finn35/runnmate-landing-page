@@ -20,12 +20,12 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 // });
 
 export const metadata: Metadata = {
-  title: "RUNNMATE - Join Europe's most sustainable running community",
+  title: "Runnmate - Join Europe's most sustainable running community",
   description: "Join Europe's most sustainable running community. Connect with fellow runners, share eco-friendly gear, and make a positive impact on the environment.",
   keywords: "sustainable running, European running community, eco-friendly gear, green running, environmental running",
-  authors: [{ name: "RUNNMATE Team" }],
-  creator: "RUNNMATE",
-  publisher: "RUNNMATE",
+  authors: [{ name: "Runnmate Team" }],
+  creator: "Runnmate",
+  publisher: "Runnmate",
   robots: {
     index: true,
     follow: true,
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://runnmate.com",
-    siteName: "RUNNMATE",
-    title: "RUNNMATE - Join Europe's most sustainable running community",
+    siteName: "Runnmate",
+    title: "Runnmate - Join Europe's most sustainable running community",
     description: "Join Europe's most sustainable running community. Connect with fellow runners, share eco-friendly gear, and make a positive impact on the environment.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "RUNNMATE - Join Europe's most sustainable running community",
+    title: "Runnmate - Join Europe's most sustainable running community",
     description: "Join Europe's most sustainable running community. Connect with fellow runners, share eco-friendly gear, and make a positive impact on the environment.",
   },
   alternates: {

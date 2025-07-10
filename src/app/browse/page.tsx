@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getCurrentUser } from '@/lib/auth'
-import { sendOfferNotification } from '@/lib/email-service'
+// Removed direct email service import - using API route instead
 import { LoadingCard, LoadingSection } from '@/components/ui/loading'
 import { Search, SHOE_SUGGESTIONS } from '@/components/ui/search'
 import { useToastHelpers } from '@/components/ui/toast'
@@ -512,16 +512,30 @@ export default function BrowsePage() {
 
       // Send email notification to seller
       if (selectedListing.seller_email) {
-        await sendOfferNotification({
-          sellerEmail: selectedListing.seller_email,
-          buyerName: offerData.buyerName,
-          buyerEmail: user.email,
-          listingTitle: `${selectedListing.brand} ${selectedListing.title}`,
-          offerPrice: offerData.offerPrice,
-          message: offerData.message,
-          listingPrice: selectedListing.price,
-          listingSize: selectedListing.size
-        })
+        try {
+          const response = await fetch('/api/send-offer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              sellerEmail: selectedListing.seller_email,
+              buyerName: offerData.buyerName,
+              buyerEmail: user.email,
+              listingTitle: `${selectedListing.brand} ${selectedListing.title}`,
+              listingPrice: selectedListing.price,
+              listingSize: selectedListing.size,
+              offerPrice: offerData.offerPrice,
+              message: offerData.message
+            })
+          })
+
+          if (!response.ok) {
+            console.error('Failed to send offer notification email')
+          }
+        } catch (error) {
+          console.error('Error sending offer notification:', error)
+        }
       }
 
       toast.success('Offer sent successfully!', 'The seller will receive an email with your offer.')

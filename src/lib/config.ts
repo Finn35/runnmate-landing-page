@@ -1,6 +1,7 @@
 // Environment-aware configuration
 const getBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
+    // Ensure no trailing slash
     return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
   }
   if (process.env.NEXT_PUBLIC_VERCEL_URL) {
@@ -27,8 +28,8 @@ export const getStravaOAuthUrl = (clientId: string, state?: string): string => {
     client_id: clientId,
     response_type: 'code',
     redirect_uri: config.stravaRedirectUri,
-    approval_prompt: 'force',
-    scope: 'read,activity:read'
+    approval_prompt: 'auto', // Changed from 'force' to 'auto' for better UX
+    scope: 'read,activity:read,profile:read_all' // Added profile:read_all to ensure we get email
   })
   
   if (state) {

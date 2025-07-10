@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getCurrentUser } from '@/lib/auth'
-import { sendOfferNotification } from '@/lib/email-service'
+// Removed direct email service import - using API route instead
 import { useLanguage } from '@/contexts/LanguageContext'
 import StravaVerificationBadge from '@/components/StravaVerificationBadge'
 
@@ -182,16 +182,30 @@ export default function ListingDetailPage() {
 
       // Send email notification to seller
       if (listing.seller_email) {
-        await sendOfferNotification({
-          sellerEmail: listing.seller_email,
-          buyerName: offerData.buyerName,
-          buyerEmail: user.email,
-          listingTitle: `${listing.brand} ${listing.title}`,
-          offerPrice: parseFloat(offerData.offerPrice),
-          message: offerData.message,
-          listingPrice: listing.price,
-          listingSize: listing.size
-        })
+        try {
+          const response = await fetch('/api/send-offer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              sellerEmail: listing.seller_email,
+              buyerName: offerData.buyerName,
+              buyerEmail: user.email,
+              listingTitle: `${listing.brand} ${listing.title}`,
+              listingPrice: listing.price,
+              listingSize: listing.size,
+              offerPrice: parseFloat(offerData.offerPrice),
+              message: offerData.message
+            })
+          })
+
+          if (!response.ok) {
+            console.error('Failed to send offer notification email')
+          }
+        } catch (error) {
+          console.error('Error sending offer notification:', error)
+        }
       }
 
       alert(t('listing.offer.success'))

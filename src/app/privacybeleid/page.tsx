@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: "Privacybeleid - RUNNMATE",
-  description: "Ontdek hoe RUNNMATE jouw privacy beschermt. We verzamelen minimale data (alleen e-mail) en delen nooit jouw gegevens met derden.",
+  title: "Privacybeleid - Runnmate",
+  description: "Ontdek hoe Runnmate jouw privacy beschermt. We verzamelen minimale data (alleen e-mail) en delen nooit jouw gegevens met derden.",
   robots: {
     index: true,
     follow: true,
@@ -23,7 +23,7 @@ export default function PrivacybeleidsPage() {
 
           <div className="prose prose-gray max-w-none">
             <p className="text-lg text-gray-700 mb-6">
-              Bij RUNNMATE hechten we veel waarde aan jouw privacy. Dit privacybeleid legt uit hoe we persoonlijke gegevens verzamelen, opslaan en gebruiken wanneer je ons platform gebruikt (het &quot;Platform&quot;).
+              Bij Runnmate hechten we veel waarde aan jouw privacy. Dit privacybeleid legt uit hoe we persoonlijke gegevens verzamelen, opslaan en gebruiken wanneer je ons platform gebruikt (het &quot;Platform&quot;).
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Gegevens die we verzamelen</h2>

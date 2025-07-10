@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 14px;">
         <strong>Reply to:</strong> ${email}<br>
-        <strong>Sent from:</strong> RUNNMATE Contact Form<br>
+        <strong>Sent from:</strong> Runnmate Contact Form<br>
         <strong>Time:</strong> ${new Date().toLocaleString()}
       </p>
     `;
