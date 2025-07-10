@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
-  try {
-    // Handle build-time calls safely
-    if (!request.url || request.url.includes('uydnxdxkjhrevyxajxya')) {
-      return NextResponse.json({ error: 'Invalid request during build' }, { status: 400 });
-    }
+  // Skip during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return new Response(null, { status: 200 });
+  }
 
+  try {
     const { userEmail } = await request.json()
     
     if (!userEmail) {

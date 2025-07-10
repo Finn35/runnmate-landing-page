@@ -23,9 +23,9 @@ interface StravaActivity {
 }
 
 export async function GET(request: NextRequest) {
-  // Handle build-time calls safely
-  if (!request.url || request.url.includes('uydnxdxkjhrevyxajxya')) {
-    return NextResponse.json({ error: 'Invalid request during build' }, { status: 400 });
+  // Skip during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return new Response(null, { status: 200 });
   }
 
   let searchParams;
