@@ -2,41 +2,60 @@ import { createClient } from '@supabase/supabase-js'
 
 // Create a dummy client for build time
 const createDummyClient = () => {
-  const dummyResponse = { data: null, error: null, count: 0 }
-  const chainMethods = {
-    select: () => ({ ...dummyResponse }),
-    insert: () => ({ ...dummyResponse }),
-    upsert: () => ({ ...dummyResponse }),
-    update: () => ({ ...dummyResponse }),
-    delete: () => ({ ...dummyResponse }),
-    eq: () => chainMethods,
-    neq: () => chainMethods,
-    gt: () => chainMethods,
-    gte: () => chainMethods,
-    lt: () => chainMethods,
-    lte: () => chainMethods,
-    like: () => chainMethods,
-    ilike: () => chainMethods,
-    is: () => chainMethods,
-    in: () => chainMethods,
-    contains: () => chainMethods,
-    containedBy: () => chainMethods,
-    range: () => chainMethods,
-    textSearch: () => chainMethods,
-    match: () => chainMethods,
-    not: () => chainMethods,
-    or: () => chainMethods,
-    filter: () => chainMethods,
-    order: () => chainMethods,
-    limit: () => chainMethods,
-    offset: () => chainMethods,
-    single: () => ({ ...dummyResponse }),
-    maybeSingle: () => ({ ...dummyResponse })
+  // Base response without count
+  const baseResponse = { 
+    data: null, 
+    error: null,
+    status: 200,
+    statusText: 'OK'
+  }
+  
+  const createChainMethods = () => {
+    const methods = {
+      select: (columns?: string, options?: { count?: 'exact' | 'planned' | 'estimated'; head?: boolean }) => {
+        // Only add count if requested
+        const response = options?.count 
+          ? { ...baseResponse, count: 0 }
+          : { ...baseResponse }
+        return { ...methods, ...response }
+      },
+      insert: () => ({ ...baseResponse }),
+      upsert: () => ({ ...baseResponse }),
+      update: () => ({ ...baseResponse }),
+      delete: () => ({ ...baseResponse }),
+      eq: () => methods,
+      neq: () => methods,
+      gt: () => methods,
+      gte: () => methods,
+      lt: () => methods,
+      lte: () => methods,
+      like: () => methods,
+      ilike: () => methods,
+      is: () => methods,
+      in: () => methods,
+      contains: () => methods,
+      containedBy: () => methods,
+      range: () => methods,
+      textSearch: () => methods,
+      match: () => methods,
+      not: () => methods,
+      or: () => methods,
+      filter: () => methods,
+      order: () => methods,
+      limit: () => methods,
+      offset: () => methods,
+      single: () => ({ ...baseResponse }),
+      maybeSingle: () => ({ ...baseResponse }),
+      then: (onfulfilled?: any) => Promise.resolve(baseResponse).then(onfulfilled),
+      catch: (onrejected?: any) => Promise.resolve(baseResponse).catch(onrejected)
+    }
+
+    return methods
   }
 
   return {
-    from: () => chainMethods,
-    rpc: () => ({ ...dummyResponse }),
+    from: () => createChainMethods(),
+    rpc: () => ({ ...baseResponse }),
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       getUser: () => Promise.resolve({ data: { user: null }, error: null }),
