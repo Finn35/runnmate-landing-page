@@ -36,7 +36,7 @@ function LoginForm() {
     }
     
     if (urlMessage === 'login_required') {
-      setMessage('To connect your Strava account, we first need to create your RUNNMATE account. This helps us maintain a trusted community of runners. After logging in, you\'ll be automatically redirected to complete your Strava verification.')
+      setMessage('To connect your Strava account, please verify your email address first. We\'ll send you a secure login link to authenticate your identity and maintain our trusted running community.')
     } else if (urlMessage === 'login_to_make_offer') {
       setMessage(t('login.messages.loginToMakeOffer'))
     } else if (urlMessage === 'login_to_buy') {
@@ -109,9 +109,10 @@ function LoginForm() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-3xl font-extrabold text-gray-900">
-          Welcome to RUNNMATE
-        </h2>
+        {/* Welcome message */}
+        <h1 className="text-2xl font-semibold text-center mb-6">
+          Welcome to Runnmate
+        </h1>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
