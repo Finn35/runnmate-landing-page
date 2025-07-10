@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
+  // Skip processing during build phase
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json({ message: 'Skipped during build phase' })
+  }
+
   try {
     const { email, lotteryConsent, shoeInterest } = await request.json()
     
