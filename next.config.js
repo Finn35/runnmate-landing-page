@@ -96,21 +96,19 @@ const nextConfig = {
     ]
   },
 
-  // Add rewrites for client-side routing
+  // Add rewrites for API routes
   async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: '/login',
-          destination: '/app/login/page',
-        },
-        {
-          source: '/api/auth/:path*',
-          destination: '/api/auth/:path*',
-        },
-      ],
-    }
-  },
+    return [
+      {
+        source: '/api/strava/callback',
+        destination: '/api/strava/callback'
+      },
+      {
+        source: '/api/auth/:path*',
+        destination: '/api/auth/:path*'
+      }
+    ]
+  }
 }
 
 module.exports = nextConfig 
