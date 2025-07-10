@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
+
+interface LaunchNotification {
+  email: string
+  lottery_consent: boolean
+  shoe_interest: string | null
+  signed_up_at: string
+  is_active: boolean
+}
 
 export async function POST(request: NextRequest) {
   // Skip processing during build phase
@@ -17,7 +26,7 @@ export async function POST(request: NextRequest) {
     console.log('Processing lottery signup:', { email, lotteryConsent, shoeInterest })
 
     // Store the signup in database
-    const { data, error } = await supabase
+    const result = await supabase
       .from('launch_notifications')
       .upsert([
         {
@@ -29,14 +38,13 @@ export async function POST(request: NextRequest) {
         }
       ], {
         onConflict: 'email'
-      })
-      .select()
+      }) as PostgrestSingleResponse<LaunchNotification>
 
-    if (error) {
-      console.error('Database error:', error)
+    if (result.error) {
+      console.error('Database error:', result.error)
       return NextResponse.json({ 
         error: 'Failed to save signup',
-        details: error.message 
+        details: result.error.message 
       }, { status: 500 })
     }
 
@@ -50,7 +58,7 @@ export async function POST(request: NextRequest) {
       message: lotteryConsent 
         ? 'Successfully entered in lottery and signed up for launch notifications'
         : 'Successfully signed up for launch notifications',
-      data: data?.[0]
+      data: result.data
     })
 
   } catch (error) {
