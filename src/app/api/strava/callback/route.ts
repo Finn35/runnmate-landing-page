@@ -23,19 +23,16 @@ interface StravaActivity {
 }
 
 export async function GET(request: NextRequest) {
+  // Handle build-time calls safely
+  if (!request.url || request.url.includes('uydnxdxkjhrevyxajxya')) {
+    return NextResponse.json({ error: 'Invalid request during build' }, { status: 400 });
+  }
+
   let searchParams;
   try {
-    // Always use the full URL from the request, or fallback to a safe default
-    let url: URL;
-    try {
-      url = new URL(request.url, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
-    } catch {
-      // If request.url is not valid, fallback to a safe default
-      url = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
-    }
+    const url = new URL(request.url);
     searchParams = url.searchParams;
   } catch {
-    // If the URL is invalid (e.g. during static build), return a safe response
     return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 });
   }
   const code = searchParams.get('code')
