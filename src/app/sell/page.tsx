@@ -15,6 +15,8 @@ export default function SellPage() {
   const toast = useToastHelpers()
   
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [formData, setFormData] = useState({
     title: '',
     brand: '',
@@ -35,6 +37,41 @@ export default function SellPage() {
   // Strava verification state
   const [stravaVerification, setStravaVerification] = useState<{ strava_athlete_name: string; total_distance_km: number; total_activities: number } | null>(null)
   const [isCheckingStrava, setIsCheckingStrava] = useState(false)
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          setUser(session.user)
+          // Auto-fill email if user is logged in
+          setFormData(prev => ({ ...prev, sellerEmail: session.user.email || '' }))
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error)
+      } finally {
+        setIsLoadingAuth(false)
+      }
+    }
+
+    checkAuth()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+        setFormData(prev => ({ ...prev, sellerEmail: session.user.email || '' }))
+      } else {
+        setUser(null)
+        setFormData(prev => ({ ...prev, sellerEmail: '' }))
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   // Check Strava verification when email changes
   useEffect(() => {
@@ -67,26 +104,22 @@ export default function SellPage() {
     }
   }
 
-  const handleConnectStrava = () => {
+  const handleConnectStrava = async () => {
+    // Check if user is logged in
+    if (!user) {
+      // Not logged in - redirect to login with return URL
+      const currentPath = window.location.pathname + window.location.search
+      router.push(`/login?message=login_required&returnTo=${encodeURIComponent(currentPath)}`)
+      return
+    }
+
     if (!formData.sellerEmail) {
       toast.warning('Email required', 'Please enter your email first to connect Strava.')
       return
     }
     
-    // Open Strava OAuth in a new window
-    const authUrl = `/api/strava/auth?user_email=${encodeURIComponent(formData.sellerEmail)}`
-    const popup = window.open(authUrl, 'strava-auth', 'width=600,height=700,scrollbars=yes,resizable=yes')
-    
-    // Listen for popup close (user completed or cancelled auth)
-    const checkClosed = setInterval(() => {
-      if (popup?.closed) {
-        clearInterval(checkClosed)
-        // Recheck verification status after popup closes
-        setTimeout(() => {
-          checkStravaVerification(formData.sellerEmail)
-        }, 1000)
-      }
-    }, 1000)
+    // Use the same approach as StravaVerificationButton - direct redirect
+    window.location.href = `/api/strava/auth?user_email=${encodeURIComponent(formData.sellerEmail)}`
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -250,6 +283,19 @@ export default function SellPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -459,11 +505,17 @@ export default function SellPage() {
                 name="sellerEmail"
                 value={formData.sellerEmail}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${user ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder={t('sell.placeholders.email')}
                 required
-                disabled={isSubmitting}
+                disabled={isSubmitting || !!user}
+                readOnly={!!user}
               />
+              {user && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Using your logged-in account email
+                </p>
+              )}
             </div>
 
             {/* Images */}

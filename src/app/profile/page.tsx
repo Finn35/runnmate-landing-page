@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getCurrentUser } from '@/lib/auth'
-import Header from '@/components/Header'
+// Header is included in root layout
 
 interface StravaVerification {
   strava_athlete_name: string
@@ -139,12 +139,10 @@ function ProfileForm() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Main Content */}
+        <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Profile</h1>
           <p className="text-gray-600">Manage your account and verification settings</p>
