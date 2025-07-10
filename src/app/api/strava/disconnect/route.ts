@@ -3,6 +3,13 @@ import { supabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure request URL is valid during build time
+    try {
+      new URL(request.url, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+    } catch {
+      // Silently handle invalid URLs during build
+    }
+
     const { userEmail } = await request.json()
     
     if (!userEmail) {
