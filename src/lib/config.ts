@@ -1,38 +1,22 @@
-// Environment-specific configuration for RUNNMATE
-
-interface Config {
-  stravaRedirectUri: string
-  baseUrl: string
-  isDevelopment: boolean
-  isProduction: boolean
-}
-
-const isDevelopment = process.env.NODE_ENV === 'development'
-const isProduction = process.env.NODE_ENV === 'production'
-
-// Get base URL from environment or detect from deployment
-const getBaseUrl = (): string => {
-  // If explicitly set in environment
+// Environment-aware configuration
+const getBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
   }
-  
-  // For development
-  if (isDevelopment) {
-    return 'http://localhost:3000'
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
   }
-  
-  // For production
-  return process.env.NEXT_PUBLIC_SITE_URL || 'https://runnmate.com'
+  return 'http://localhost:3000'
 }
 
-const baseUrl = getBaseUrl()
-
-const config: Config = {
-  stravaRedirectUri: `${baseUrl}/api/strava/callback`,
-  baseUrl,
-  isDevelopment,
-  isProduction
+const config = {
+  // Base URL for the application
+  baseUrl: getBaseUrl(),
+  
+  // Strava OAuth configuration
+  stravaRedirectUri: `${getBaseUrl()}/api/strava/callback`,
+  
+  // Other configuration values...
 }
 
 export default config

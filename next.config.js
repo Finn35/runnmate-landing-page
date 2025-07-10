@@ -95,6 +95,22 @@ const nextConfig = {
       },
     ]
   },
+
+  // Add rewrites for client-side routing
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/login',
+          destination: '/app/login/page',
+        },
+        {
+          source: '/api/auth/:path*',
+          destination: '/api/auth/:path*',
+        },
+      ],
+    }
+  },
 }
 
 module.exports = nextConfig 

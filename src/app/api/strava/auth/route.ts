@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   // Get the user's email or ID from search params to associate with the Strava account
   let searchParams;
   try {
-    const url = new URL(request.url, process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+    const url = new URL(request.url, config.baseUrl);
     searchParams = url.searchParams;
   } catch {
     return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 });
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   authUrl.searchParams.set('redirect_uri', config.stravaRedirectUri) // Environment-aware
   authUrl.searchParams.set('response_type', 'code')
   authUrl.searchParams.set('scope', 'read,activity:read')
-  authUrl.searchParams.set('state', encodeURIComponent(state))
+  authUrl.searchParams.set('state', state) // No need to encode twice
   
   return NextResponse.redirect(authUrl.toString())
 } 

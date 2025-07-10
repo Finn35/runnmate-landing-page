@@ -1,26 +1,17 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
-import Link from 'next/link'
 
-function LoginForm() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginFormContent />
-    </Suspense>
-  )
-}
-
-function LoginFormContent() {
+export default function LoginPage() {
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const searchParams = useSearchParams()
   const returnTo = searchParams.get('returnTo')
 
   // Handle URL error parameters
@@ -118,142 +109,6 @@ function LoginFormContent() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* Clean Login Card */}
-        <div className="bg-white py-8 px-6 shadow-lg sm:rounded-xl sm:px-10">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              {searchParams.get('message') === 'strava_verification_requires_login' 
-                ? 'Create Your RUNNMATE Account'
-                : t('login.title')}
-            </h2>
-            <p className="text-gray-600">
-              {searchParams.get('message') === 'strava_verification_requires_login'
-                ? 'First, let\'s set up your account with a magic link'
-                : t('login.subtitle')}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                {t('login.emailLabel')}
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
-                placeholder={t('login.emailPlaceholder')}
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                <p className="text-red-800 text-sm">{error}</p>
-              </div>
-            )}
-
-            {/* Success Message */}
-            {message && (
-              <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                <p className="text-green-800 text-sm font-medium">{message}</p>
-                <p className="text-green-700 text-xs mt-1">
-                  {t('login.checkSpam')}
-                </p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${
-                isLoading
-                  ? 'bg-blue-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              {isLoading ? `${t('login.sendLink')}...` : t('login.sendLink')}
-            </button>
-          </form>
-
-          {/* Simple Footer */}
-          <div className="mt-8 pt-6 border-t border-gray-200 text-center space-y-3">
-            <p className="text-xs text-gray-500">
-              {t('login.secureLink')}
-            </p>
-            <div className="text-sm text-gray-600">
-              {t('login.wantToSell')} <a href="/sell" className="text-blue-600 hover:text-blue-800 font-medium">{t('login.listYourShoes')}</a>
-            </div>
-            <Link href="/" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              {t('login.backToHome')}
-            </Link>
-          </div>
-        </div>
-      </div>
-
-
-    </div>
-  )
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginPageContent />
-    </Suspense>
-  )
-}
-
-function LoginPageContent() {
-  const searchParams = useSearchParams()
-  const message = searchParams.get('message')
-  const distance = searchParams.get('distance')
-
-  const getMessageContent = () => {
-    switch (message) {
-      case 'check_email_strava_connected':
-        return (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <h2 className="text-green-800 font-semibold mb-2">
-              ✅ Strava Connected Successfully!
-            </h2>
-            <p className="text-green-700">
-              {distance ? `${distance}km of running verified! ` : ''}
-              We've sent you a magic link email to secure your account. 
-              Click the link to complete setup and view your verified profile.
-            </p>
-          </div>
-        )
-      case 'check_email':
-        return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-blue-800">
-              Check your email for a magic link to sign in.
-            </p>
-          </div>
-        )
-      case 'invalid_link':
-        return (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800">
-              That link has expired. Please try signing in again.
-            </p>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-3xl font-extrabold text-gray-900">
           Welcome to RUNNMATE
         </h2>
@@ -261,9 +116,24 @@ function LoginPageContent() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {getMessageContent()}
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded mb-6">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {message && (
+            <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded mb-6">
+              <p className="text-green-800 text-sm font-medium">{message}</p>
+              <p className="text-green-700 text-xs mt-1">
+                {t('login.checkSpam')}
+              </p>
+            </div>
+          )}
           
-          <form className="space-y-6" action="/api/auth/sign-in" method="POST">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
@@ -275,7 +145,11 @@ function LoginPageContent() {
                   type="email"
                   autoComplete="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Enter your email"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -283,9 +157,12 @@ function LoginPageContent() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={isLoading}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
               >
-                Send Magic Link
+                {isLoading ? 'Sending...' : 'Send Magic Link'}
               </button>
             </div>
           </form>

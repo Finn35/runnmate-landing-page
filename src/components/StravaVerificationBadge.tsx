@@ -74,7 +74,10 @@ export default function StravaVerificationBadge({
       }
 
       // User is logged in - redirect to Strava auth
-      window.location.href = `/api/strava/auth?user_email=${encodeURIComponent(session.user.email)}`
+      if (session.user.email) {
+        const stravaAuthUrl = `/api/strava/auth?user_email=${encodeURIComponent(session.user.email)}`
+        window.location.href = stravaAuthUrl
+      }
     } catch (error) {
       console.error('Error connecting to Strava:', error)
     } finally {
@@ -124,7 +127,7 @@ export default function StravaVerificationBadge({
   if (variant === 'compact') {
     return (
       <div className={`inline-flex items-center space-x-1 text-sm ${className}`}>
-        <span className="text-green-600">✅</span>
+        <span className="text-green-600">✓</span>
         <span className="font-medium text-green-700">
           {verification.total_distance_km} km logged
         </span>
