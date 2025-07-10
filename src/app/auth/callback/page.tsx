@@ -40,6 +40,27 @@ export default function AuthCallback() {
           setStep('redirecting')
           await new Promise(resolve => setTimeout(resolve, 800))
           
+          // Check if we need to continue with Strava verification
+          const searchParams = new URLSearchParams(window.location.search)
+          if (searchParams.get('message') === 'strava_verification_requires_login') {
+            // Initiate Strava verification
+            const state = encodeURIComponent(JSON.stringify({
+              userEmail: data.user?.email,
+              timestamp: Date.now()
+            }))
+
+            const stravaAuthUrl = `https://www.strava.com/oauth/authorize?` +
+              `client_id=${process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID}` +
+              `&response_type=code` +
+              `&redirect_uri=${process.env.NEXT_PUBLIC_SITE_URL}/api/strava/callback` +
+              `&approval_prompt=auto` +
+              `&scope=read,activity:read` +
+              `&state=${state}`
+
+            window.location.href = stravaAuthUrl
+            return
+          }
+          
           // Check for redirect URL in sessionStorage (set when redirecting to login)
           const redirectUrl = sessionStorage.getItem('auth_redirect')
           if (redirectUrl) {
@@ -100,7 +121,9 @@ export default function AuthCallback() {
             </svg>
           ),
           title: 'Success! 🎉',
-          subtitle: 'You\'re now signed in to RUNNMATE',
+          subtitle: new URLSearchParams(window.location.search).get('message') === 'strava_verification_requires_login'
+            ? 'Now connecting to Strava...'
+            : 'You\'re now signed in to RUNNMATE',
           bgColor: 'bg-green-100'
         }
       case 'redirecting':
@@ -115,8 +138,12 @@ export default function AuthCallback() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           ),
-          title: 'Taking you to your shoes...',
-          subtitle: 'Almost there! Redirecting to continue your purchase',
+          title: new URLSearchParams(window.location.search).get('message') === 'strava_verification_requires_login'
+            ? 'Connecting to Strava...'
+            : 'Taking you to your shoes...',
+          subtitle: new URLSearchParams(window.location.search).get('message') === 'strava_verification_requires_login'
+            ? 'Almost there! Connecting to verify your running history'
+            : 'Almost there! Redirecting to continue your purchase',
           bgColor: 'bg-orange-100'
         }
     }

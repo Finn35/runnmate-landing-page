@@ -13,8 +13,8 @@ const isProduction = process.env.NODE_ENV === 'production'
 // Get base URL from environment or detect from deployment
 const getBaseUrl = (): string => {
   // If explicitly set in environment
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return process.env.NEXT_PUBLIC_BASE_URL
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
   }
   
   // For development
@@ -22,13 +22,8 @@ const getBaseUrl = (): string => {
     return 'http://localhost:3000'
   }
   
-  // For production - you'll need to set this
-  // Common patterns:
-  // - Vercel: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://yourdomain.com'
-  // - Netlify: process.env.URL || 'https://yourdomain.com' 
-  // - Custom: 'https://yourdomain.com'
-  
-  return process.env.NEXT_PUBLIC_PRODUCTION_URL || 'https://yourdomain.com'
+  // For production
+  return process.env.NEXT_PUBLIC_SITE_URL || 'https://runnmate.com'
 }
 
 const baseUrl = getBaseUrl()

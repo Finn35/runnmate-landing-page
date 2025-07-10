@@ -20,13 +20,15 @@ if (missingVars.length > 0) {
 // TypeScript type assertion since we've checked these exist
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-console.log('Initializing Supabase client with:', {
+console.log('Supabase Configuration:', {
   url: supabaseUrl,
-  hasAnonKey: !!supabaseAnonKey
+  hasAnonKey: !!supabaseAnonKey,
+  hasServiceKey: !!supabaseServiceKey
 });
 
-// Create the main client with anon key
+// Create the main client with anon key for regular user operations
 export const supabase = createClient<Database>(
   supabaseUrl,
   supabaseAnonKey,
@@ -38,6 +40,16 @@ export const supabase = createClient<Database>(
     }
   }
 );
+
+// Create a service role client for admin operations (like Strava callback)
+export const supabaseAdmin = supabaseServiceKey
+  ? createClient<Database>(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+  : null;
 
 // Test the connection
 (async () => {

@@ -18,9 +18,10 @@ export async function GET(request: NextRequest) {
   const userEmail = searchParams.get('user_email')
   
   // Strava OAuth configuration
-  const stravaClientId = process.env.STRAVA_CLIENT_ID
+  const stravaClientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || process.env.STRAVA_CLIENT_ID
   
   if (!stravaClientId) {
+    console.error('Strava OAuth not configured: Missing client ID')
     return NextResponse.json({ error: 'Strava OAuth not configured' }, { status: 500 })
   }
   

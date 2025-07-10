@@ -12,6 +12,7 @@ import { Search, SHOE_SUGGESTIONS } from '@/components/ui/search'
 import { useToastHelpers } from '@/components/ui/toast'
 import { Pagination, PaginationInfo } from '@/components/ui/pagination'
 import { useLanguage } from '@/contexts/LanguageContext'
+import StravaVerificationBadge from '@/components/StravaVerificationBadge'
 
 interface Listing {
   id: string

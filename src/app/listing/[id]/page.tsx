@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { getCurrentUser } from '@/lib/auth'
 import { sendOfferNotification } from '@/lib/email-service'
 import { useLanguage } from '@/contexts/LanguageContext'
+import StravaVerificationBadge from '@/components/StravaVerificationBadge'
 
 interface Listing {
   id: string
@@ -369,6 +370,17 @@ export default function ListingDetailPage() {
                   </div>
                   <div className="text-3xl font-bold text-gray-900">€{listing.price}</div>
                 </div>
+
+                {/* Seller verification */}
+                {listing.seller_email && (
+                  <div className="flex items-center space-x-2">
+                    <StravaVerificationBadge 
+                      userEmail={listing.seller_email} 
+                      variant="detailed"
+                      className="w-full"
+                    />
+                  </div>
+                )}
 
                 {/* Product Badges */}
                 <div className="flex flex-wrap gap-2">

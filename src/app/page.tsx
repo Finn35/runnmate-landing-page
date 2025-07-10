@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabase';
+import StravaVerificationButton from '@/components/StravaVerificationButton';
 
 interface FeaturedListing {
   id: string;
@@ -192,15 +193,9 @@ export default function Home() {
               {t('home.strava.subtitle')}
             </p>
             
-            <a 
-              href="/profile"
-              className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors inline-flex items-center"
-            >
-              <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-              </svg>
-              {t('home.strava.connectButton')}
-            </a>
+            <div className="flex justify-center">
+              <StravaVerificationButton />
+            </div>
             
             <p className="text-sm text-gray-500 mt-4">
               {t('home.strava.privacy')}

@@ -39,6 +39,8 @@ function LoginForm() {
       setMessage(t('login.messages.loginToMakeOffer'))
     } else if (urlMessage === 'login_to_buy') {
       setMessage(t('login.messages.loginToBuy'))
+    } else if (urlMessage === 'strava_verification_requires_login') {
+      setMessage('To verify your running history with Strava, we first need to create your RUNNMATE account. This helps us maintain a trusted community of runners. After logging in, you\'ll be automatically redirected to complete your Strava verification.')
     }
   }, [searchParams, t])
 
@@ -71,7 +73,7 @@ function LoginForm() {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/auth/callback?${searchParams.toString()}`
         }
       })
 
@@ -105,10 +107,14 @@ function LoginForm() {
         <div className="bg-white py-8 px-6 shadow-lg sm:rounded-xl sm:px-10">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              {t('login.title')}
+              {searchParams.get('message') === 'strava_verification_requires_login' 
+                ? 'Create Your RUNNMATE Account'
+                : t('login.title')}
             </h2>
             <p className="text-gray-600">
-              {t('login.subtitle')}
+              {searchParams.get('message') === 'strava_verification_requires_login'
+                ? 'First, let\'s set up your account with a magic link'
+                : t('login.subtitle')}
             </p>
           </div>
 
@@ -182,19 +188,92 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  const { t } = useLanguage()
-  
+  const searchParams = useSearchParams()
+  const message = searchParams.get('message')
+  const distance = searchParams.get('distance')
+
+  const getMessageContent = () => {
+    switch (message) {
+      case 'check_email_strava_connected':
+        return (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <h2 className="text-green-800 font-semibold mb-2">
+              ✅ Strava Connected Successfully!
+            </h2>
+            <p className="text-green-700">
+              {distance ? `${distance}km of running verified! ` : ''}
+              We've sent you a magic link email to secure your account. 
+              Click the link to complete setup and view your verified profile.
+            </p>
+          </div>
+        )
+      case 'check_email':
+        return (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-blue-800">
+              Check your email for a magic link to sign in.
+            </p>
+          </div>
+        )
+      case 'invalid_link':
+        return (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">
+              That link has expired. Please try signing in again.
+            </p>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-pulse">
-            <div className="h-8 w-32 bg-gray-200 rounded mx-auto"></div>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          Welcome to RUNNMATE
+        </h2>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {getMessageContent()}
+          
+          <form className="space-y-6" action="/api/auth/sign-in" method="POST">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Send Magic Link
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6">
+            <p className="text-center text-sm text-gray-600">
+              No account needed! Just enter your email and we'll send you a secure login link.
+            </p>
           </div>
         </div>
       </div>
-    }>
-      <LoginForm />
-    </Suspense>
+    </div>
   )
 }
