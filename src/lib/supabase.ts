@@ -1,93 +1,119 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
+import { Database } from './database.types';
 
 // Create a dummy client for build time
 const createDummyClient = () => {
-  // Base response without count
   const baseResponse = { 
     data: null, 
     error: null,
     status: 200,
     statusText: 'OK'
-  }
-  
+  };
+
   const createChainMethods = () => {
     const methods = {
-      select: (columns?: string, options?: { count?: 'exact' | 'planned' | 'estimated'; head?: boolean }) => {
-        // Only add count if requested
-        const response = options?.count 
-          ? { ...baseResponse, count: 0 }
-          : { ...baseResponse }
-
-        // Create a Promise-like object that is also thenable
-        const result = Promise.resolve(response)
-        Object.assign(result, methods)
-        return result
+      select: () => {
+        const result = Promise.resolve(baseResponse);
+        Object.assign(result, methods);
+        return result;
       },
-      insert: () => Promise.resolve({ ...baseResponse }),
-      upsert: () => Promise.resolve({ ...baseResponse }),
-      update: () => Promise.resolve({ ...baseResponse }),
-      delete: () => Promise.resolve({ ...baseResponse }),
       eq: () => methods,
       neq: () => methods,
       gt: () => methods,
       gte: () => methods,
       lt: () => methods,
       lte: () => methods,
-      like: () => methods,
-      ilike: () => methods,
-      is: () => methods,
       in: () => methods,
-      contains: () => methods,
-      containedBy: () => methods,
-      range: () => methods,
-      textSearch: () => methods,
       match: () => methods,
-      not: () => methods,
-      or: () => methods,
-      filter: () => methods,
+      single: () => Promise.resolve(baseResponse),
+      update: () => Promise.resolve(baseResponse),
+      upsert: () => Promise.resolve(baseResponse),
+      delete: () => Promise.resolve(baseResponse),
       order: () => methods,
-      limit: () => methods,
-      offset: () => methods,
-      single: () => Promise.resolve({ ...baseResponse }),
-      maybeSingle: () => Promise.resolve({ ...baseResponse })
-    }
-
-    return methods
-  }
+      limit: () => methods
+    };
+    return methods;
+  };
 
   return {
     from: () => createChainMethods(),
-    rpc: () => Promise.resolve({ ...baseResponse }),
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       getUser: () => Promise.resolve({ data: { user: null }, error: null }),
       signOut: () => Promise.resolve({ error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } }, error: null })
-    },
-    storage: {
-      from: () => ({
-        upload: () => Promise.resolve({ data: null, error: null }),
-        download: () => Promise.resolve({ data: null, error: null }),
-        remove: () => Promise.resolve({ data: null, error: null }),
-        list: () => Promise.resolve({ data: null, error: null })
-      })
     }
+  };
+};
+
+// Validate Supabase URL
+const validateSupabaseUrl = (url: string | undefined): string => {
+  if (!url) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL is not defined');
   }
-}
+
+  try {
+    // Ensure URL has protocol
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = `https://${url}`;
+    }
+    
+    // Test if it's a valid URL
+    new URL(url);
+    return url;
+  } catch (error) {
+    console.error('Invalid Supabase URL:', error);
+    throw new Error('Invalid NEXT_PUBLIC_SUPABASE_URL format');
+  }
+};
 
 // Initialize Supabase client
 const initSupabase = () => {
-  // During build time, return a dummy client
   if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return createDummyClient()
+    return createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uydnxdxkjhrevyxajxya.supabase.co'
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZG54ZHhramhyZXZ5eGFqeHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2NDM4ODAsImV4cCI6MjA2NzIxOTg4MH0.zaTeT6o2pSIIqTnl7dRBRzflhncgW9OjgjCG3FwYTiQ'
-  return createClient(supabaseUrl, supabaseAnonKey)
+  const supabaseUrl = validateSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseAnonKey) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined');
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseAnonKey);
+};
+
+// Initialize admin client
+const initSupabaseAdmin = () => {
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
+  }
+
+  const supabaseUrl = validateSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseServiceKey) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not defined');
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseServiceKey);
+};
+
+// Initialize clients with error handling
+let supabase: ReturnType<typeof createClient<Database>>;
+let supabaseAdmin: ReturnType<typeof createClient<Database>>;
+
+try {
+  supabase = initSupabase();
+  supabaseAdmin = initSupabaseAdmin();
+} catch (error) {
+  console.error('Failed to initialize Supabase clients:', error);
+  // Provide fallback clients that will return errors
+  supabase = createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
+  supabaseAdmin = createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
 }
 
-export const supabase = initSupabase()
+export { supabase, supabaseAdmin };
 
 // Database types for TypeScript support
 export interface Listing {
