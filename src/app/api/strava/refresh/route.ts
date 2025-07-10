@@ -2,14 +2,54 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
 
-// Create a server-side only client
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: { persistSession: false }
-  }
-);
+// Create a dummy client for build time
+const createDummyClient = () => {
+  const baseResponse = { 
+    data: null, 
+    error: null,
+    status: 200,
+    statusText: 'OK'
+  };
+
+  const createChainMethods = () => {
+    const methods = {
+      select: () => {
+        const result = Promise.resolve(baseResponse);
+        Object.assign(result, methods);
+        return result;
+      },
+      eq: () => methods,
+      neq: () => methods,
+      gt: () => methods,
+      gte: () => methods,
+      lt: () => methods,
+      lte: () => methods,
+      in: () => methods,
+      match: () => methods,
+      single: () => Promise.resolve(baseResponse),
+      update: () => Promise.resolve(baseResponse),
+      upsert: () => Promise.resolve(baseResponse),
+      delete: () => Promise.resolve(baseResponse),
+      order: () => methods,
+      limit: () => methods,
+      from: () => methods
+    };
+    return methods;
+  };
+
+  return createChainMethods();
+};
+
+// Initialize Supabase client
+const supabase = process.env.NEXT_PHASE === 'phase-production-build'
+  ? createDummyClient() as unknown as ReturnType<typeof createClient<Database>>
+  : createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: { persistSession: false }
+      }
+    );
 
 // Force Node.js runtime for proper environment variable access
 export const runtime = 'nodejs';
