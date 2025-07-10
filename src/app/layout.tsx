@@ -3,6 +3,7 @@ import "./globals.css";
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ToastProvider } from '@/components/ui/toast';
 import Header from '@/components/Header';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 // Temporarily removed analytics to fix build issues
 // import ClientAnalyticsWrapper from '@/components/ClientAnalyticsWrapper';
 
@@ -64,6 +65,7 @@ export default function RootLayout({
       >
         <LanguageProvider>
           <ToastProvider>
+            <GoogleAnalytics />
             {/* Temporarily removed analytics to fix build issues */}
             {/* <ClientAnalyticsWrapper /> */}
             <Header />
