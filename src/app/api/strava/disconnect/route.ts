@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { handleBuildTimeRequest } from '@/lib/strava'
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
+
+interface StravaVerification {
+  access_token: string
+  strava_athlete_id: string
+}
 
 export async function POST(request: NextRequest) {
   // Skip during build time
@@ -15,12 +21,12 @@ export async function POST(request: NextRequest) {
     }
     
     // Get the user's Strava data to revoke access token
-    const { data: stravaData, error: fetchError } = await supabase
-      .from('user_strava_verifications')
+    const { data: stravaData, error: fetchError } = await ((supabase
+      .from('user_strava_verifications') as any)
       .select('access_token, strava_athlete_id')
       .eq('user_email', userEmail)
       .eq('is_active', true)
-      .single()
+      .single() as Promise<PostgrestSingleResponse<StravaVerification>>)
     
     if (fetchError || !stravaData) {
       return NextResponse.json({ error: 'Strava verification not found' }, { status: 404 })
@@ -41,13 +47,13 @@ export async function POST(request: NextRequest) {
     }
     
     // Deactivate the verification in our database
-    const { error: updateError } = await supabase
-      .from('user_strava_verifications')
+    const { error: updateError } = await ((supabase
+      .from('user_strava_verifications') as any)
       .update({ 
         is_active: false,
         disconnected_at: new Date().toISOString()
       })
-      .eq('user_email', userEmail)
+      .eq('user_email', userEmail))
     
     if (updateError) {
       return NextResponse.json({ error: 'Failed to disconnect Strava' }, { status: 500 })
