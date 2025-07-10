@@ -1,12 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // Disable type checking during build - we'll handle it in development
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true // Ignore TypeScript errors during build
   },
   eslint: {
-    // Disable eslint during build - we'll handle it in development
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true // Ignore ESLint errors during build
   },
   images: {
     domains: ['images.unsplash.com'],
