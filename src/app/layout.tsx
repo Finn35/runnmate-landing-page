@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ToastProvider } from '@/components/ui/toast';
+import Header from '@/components/Header';
 // Temporarily removed analytics to fix build issues
 // import ClientAnalyticsWrapper from '@/components/ClientAnalyticsWrapper';
 
@@ -65,7 +66,10 @@ export default function RootLayout({
           <ToastProvider>
             {/* Temporarily removed analytics to fix build issues */}
             {/* <ClientAnalyticsWrapper /> */}
-            {children}
+            <Header />
+            <main>
+              {children}
+            </main>
           </ToastProvider>
         </LanguageProvider>
       </body>

@@ -8,7 +8,6 @@ import { LoadingSpinner } from '@/components/ui/loading'
 import { useToastHelpers } from '@/components/ui/toast'
 // import Logo from '@/components/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
-import Header from '@/components/Header'
 
 export default function SellPage() {
   const { t } = useLanguage()
@@ -255,8 +254,6 @@ export default function SellPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-8">

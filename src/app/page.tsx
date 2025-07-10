@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Header from '@/components/Header';
-import Logo from '@/components/Logo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabase';
 
@@ -116,8 +114,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-50 via-white to-orange-50 py-12 sm:py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -201,7 +197,7 @@ export default function Home() {
               className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors inline-flex items-center"
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.599h4.172L10.463 0l-7 13.828h4.169"/>
+                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
               </svg>
               {t('home.strava.connectButton')}
             </a>
@@ -332,9 +328,6 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-orange-500/5"></div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-6">
-              <Logo size="lg" />
-            </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               <span 
                 dangerouslySetInnerHTML={{
@@ -456,7 +449,7 @@ export default function Home() {
             {/* Logo and Description */}
             <div className="md:col-span-1">
               <div className="mb-4">
-                <Logo size="lg" />
+                {/* Removed Logo component */}
               </div>
               <p className="text-gray-400 text-sm max-w-md">
                 {t('footer.description')}

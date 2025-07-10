@@ -106,7 +106,10 @@ export const translations = {
         minPrice: 'Min €',
         maxPrice: 'Max €',
         searchPlaceholder: 'Search shoes, brands, or locations...',
-        onlyCleanedShoes: 'Only cleaned shoes'
+        onlyCleanedShoes: 'Only cleaned shoes',
+        noShoesFound: 'No shoes found',
+        beFirst: 'Be the first to list your shoes!',
+        sellYourShoes: 'List Your Shoes'
       },
       results: {
         found: 'found',
@@ -384,7 +387,7 @@ export const translations = {
     // Navigation
     nav: {
       home: 'Home',
-      browse: 'Schoenen',
+      browse: 'Bladeren',
       sell: 'Verkopen',
       login: 'Inloggen',
       profile: 'Profiel'
@@ -392,7 +395,7 @@ export const translations = {
     
     // Header messages
     header: {
-      home: 'Home', // or 'Startpagina' if you prefer
+      home: 'Home',
       sell: 'Verkopen',
       browse: 'Bladeren',
       tagline: 'Geef je schoenen een tweede leven'
@@ -473,19 +476,21 @@ export const translations = {
     
     // Browse page
     browse: {
-      title: 'Schoenen Bekijken',
+      title: 'Bladeren',
       search: 'Zoek schoenen, merken of locaties...',
       filters: {
         allSizes: 'Alle Maten',
         allBrands: 'Alle Merken',
         allCountries: 'Alle Landen',
         allGenders: 'Alle Geslachten',
-        onlyCleaned: 'Alleen schone schoenen',
+        onlyCleanedShoes: 'Alleen gereinigde schoenen',
         clearAll: 'Alles wissen',
         minPrice: 'Min €',
         maxPrice: 'Max €',
         searchPlaceholder: 'Zoek schoenen, merken of locaties...',
-        onlyCleanedShoes: 'Alleen schoongemaakte schoenen'
+        noShoesFound: 'Geen schoenen gevonden',
+        beFirst: 'Wees de eerste die schoenen aanbiedt!',
+        sellYourShoes: 'Bied je schoenen aan'
       },
       results: {
         found: 'gevonden',

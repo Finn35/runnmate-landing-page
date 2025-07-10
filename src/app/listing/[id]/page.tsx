@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
@@ -8,7 +8,6 @@ import { supabase } from '@/lib/supabase'
 import { getCurrentUser } from '@/lib/auth'
 import { sendOfferNotification } from '@/lib/email-service'
 import { useLanguage } from '@/contexts/LanguageContext'
-import Header from '@/components/Header'
 
 interface Listing {
   id: string
@@ -39,6 +38,9 @@ export default function ListingDetailPage() {
   const [imageLoading, setImageLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
   const [offerData, setOfferData] = useState({
     buyerName: '',
     buyerEmail: '',
@@ -46,6 +48,36 @@ export default function ListingDetailPage() {
     message: ''
   })
   const [isSubmittingOffer, setIsSubmittingOffer] = useState(false)
+
+  // Handle swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = useCallback(() => {
+    if (!listing?.image_urls.length) return
+
+    const minSwipeDistance = 50
+    const swipeDistance = touchStart - touchEnd
+
+    if (Math.abs(swipeDistance) > minSwipeDistance) {
+      if (swipeDistance > 0) {
+        // Swipe left
+        setCurrentImageIndex(prev => 
+          prev === listing.image_urls.length - 1 ? 0 : prev + 1
+        )
+      } else {
+        // Swipe right
+        setCurrentImageIndex(prev => 
+          prev === 0 ? listing.image_urls.length - 1 : prev - 1
+        )
+      }
+    }
+  }, [touchStart, touchEnd, listing?.image_urls.length])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -241,197 +273,158 @@ export default function ListingDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('listing.loading')}</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
   }
 
   if (!listing) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('listing.notFound')}</h1>
-          <p className="text-gray-600 mb-6">{t('listing.notFoundDescription')}</p>
-          <Link 
-            href="/browse"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            {t('listing.backToBrowse')}
-          </Link>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <h1 className="text-2xl font-bold mb-4">{t('listing.notFound')}</h1>
+        <Link href="/browse" className="text-blue-500 hover:underline">
+          {t('common.backToBrowse')}
+        </Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-
-      {/* Back to Browse */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <Link 
-          href="/browse"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
-        >
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {t('listing.backToBrowse')}
-        </Link>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 pb-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Images */}
-          <div className="space-y-4">
-            {/* Main Image */}
-            <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-sm border border-gray-200 relative">
-              {imageLoading && (
-                <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
-                  <div className="text-gray-400">{t('common.loading')}</div>
-                </div>
-              )}
-              <Image
-                src={listing.image_urls[currentImageIndex] || '/placeholder-shoe.jpg'}
-                alt={`${listing.title} - Main photo`}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                quality={95}
-                placeholder="blur"
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                onLoad={() => setImageLoading(false)}
-                onError={() => {
-                  setImageError(true)
-                  setImageLoading(false)
-                }}
-              />
-              {imageError && (
-                <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <div className="text-2xl mb-2">👟</div>
-                    <div className="text-sm">{t('listing.imageUnavailable')}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Thumbnail Images */}
-            {listing.image_urls.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {listing.image_urls.map((url, index) => (
+    <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:px-8">
+        <div className="md:grid md:grid-cols-2 md:gap-8">
+          {/* Image Gallery - Left Column */}
+          <div className="md:sticky md:top-24">
+            <div 
+              className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : 'w-full'}`}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="relative aspect-square w-full rounded-2xl overflow-hidden">
+                <Image
+                  src={listing.image_urls[currentImageIndex]}
+                  alt={`${listing.brand} ${listing.title}`}
+                  fill
+                  className={`object-cover ${isFullscreen ? 'object-contain' : ''} hover:scale-105 transition-transform duration-300`}
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  onLoadingComplete={() => setImageLoading(false)}
+                  onError={() => setImageError(true)}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                />
+              </div>
+              
+              {/* Image Navigation */}
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                {listing.image_urls.map((_, index) => (
                   <button
                     key={index}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-300 hover:bg-gray-400'
+                    }`}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`aspect-square w-20 min-w-[80px] rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                      currentImageIndex === index ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300'
-                    } relative`}
-                  >
-                    <Image
-                      src={url}
-                      alt={`${listing.title} photo ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                      quality={80}
-                      loading="lazy"
-                      placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                    />
-                  </button>
+                  />
                 ))}
               </div>
-            )}
+
+              {/* Image Counter */}
+              <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1.5 rounded-full text-sm font-medium">
+                {currentImageIndex + 1}/{listing.image_urls.length}
+              </div>
+            </div>
+
+            {/* Thumbnail Strip - Desktop Only */}
+            <div className="hidden md:grid grid-flow-col gap-2 mt-4 overflow-x-auto">
+              {listing.image_urls.map((url, index) => (
+                <button
+                  key={index}
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden ${
+                    index === currentImageIndex ? 'ring-2 ring-blue-500' : 'hover:opacity-80'
+                  }`}
+                  onClick={() => setCurrentImageIndex(index)}
+                >
+                  <Image
+                    src={url}
+                    alt={`${listing.brand} ${listing.title} thumbnail ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Details */}
-          <div className="space-y-6">
-            {/* Title and Price */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {listing.title}
-              </h1>
-              <div className="flex items-center gap-4 mb-4">
-                <span className="text-3xl font-bold text-blue-600">€{listing.price}</span>
-                <span className="text-lg text-gray-600">{t('listing.sizeEU')} {listing.size}</span>
+          {/* Product Details - Right Column */}
+          <div className="mt-8 md:mt-0">
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <div className="space-y-6">
+                {/* Title and Price */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">{listing.brand}</h1>
+                    <p className="text-xl text-gray-600 mt-1">{listing.title}</p>
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900">€{listing.price}</div>
+                </div>
+
+                {/* Product Badges */}
+                <div className="flex flex-wrap gap-2">
+                  <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${getConditionColor(listing.condition)}`}>
+                    {getConditionLabel(listing.condition)}
+                  </span>
+                  {listing.cleaning_status && (
+                    <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-purple-100 text-purple-800 text-sm font-medium">
+                      {getCleaningIcon(listing.cleaning_status)}
+                      {getCleaningLabel(listing.cleaning_status)}
+                    </span>
+                  )}
+                  {listing.gender && (
+                    <span className="px-4 py-1.5 rounded-full bg-pink-100 text-pink-800 text-sm font-medium">
+                      {getGenderLabel(listing.gender)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Product Information */}
+                <div className="space-y-6 divide-y divide-gray-100">
+                  <div className="grid grid-cols-2 gap-6 py-4">
+                    <div>
+                      <p className="text-sm text-gray-500">{t('listing.size')}</p>
+                      <p className="text-lg font-medium text-gray-900 mt-1">EU {listing.size}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">{t('listing.location')}</p>
+                      <p className="text-lg font-medium text-gray-900 mt-1">{listing.city || listing.country}</p>
+                    </div>
+                  </div>
+                  
+                  {listing.description && (
+                    <div className="py-4">
+                      <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('listing.description')}</h2>
+                      <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">{listing.description}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-4">
+                  <button
+                    onClick={handleBuyNow}
+                    className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-colors"
+                  >
+                    {t('listing.buyNow')}
+                  </button>
+                  <button
+                    onClick={handleOfferClick}
+                    className="flex-1 bg-gray-100 text-gray-800 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    {t('listing.makeOffer')}
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* Badges */}
-            <div className="flex flex-wrap gap-3">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getConditionColor(listing.condition)}`}>
-                {getConditionLabel(listing.condition)} {t('listing.condition')}
-              </span>
-              <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
-                {listing.brand}
-              </span>
-              {listing.gender && (
-                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
-                  {getGenderLabel(listing.gender)}
-                </span>
-              )}
-              {listing.cleaning_status && (
-                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-                  {getCleaningIcon(listing.cleaning_status)} {getCleaningLabel(listing.cleaning_status)}
-                </span>
-              )}
-            </div>
-
-            {/* Location */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="font-medium">
-                  {listing.city ? `${listing.city}, ${listing.country}` : listing.country}
-                </span>
-              </div>
-              {listing.city && (
-                <p className="text-sm text-green-600 mt-1 ml-7">
-                  ✅ {t('listing.localPickupAvailable')}
-                </p>
-              )}
-            </div>
-
-            {/* Description */}
-            {listing.description && (
-              <div className="bg-white rounded-lg p-4 border border-gray-200">
-                <h3 className="font-semibold text-gray-900 mb-2">{t('listing.description')}</h3>
-                <p className="text-gray-700 leading-relaxed">{listing.description}</p>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="space-y-3 pt-4">
-              {/* Primary Action - Buy Now */}
-              <button
-                onClick={handleBuyNow}
-                className="w-full bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors text-lg font-medium"
-              >
-                {t('listing.buyNow')} - €{listing.price}
-              </button>
-              
-              {/* Secondary Action - Make Offer */}
-              <button
-                onClick={handleOfferClick}
-                className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-lg font-medium"
-              >
-                {t('listing.makeOffer')}
-              </button>
-            </div>
-
-            {/* Listing Info */}
-            <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
-              <p>{t('listing.listed')} {new Date(listing.created_at).toLocaleDateString()}</p>
-              <p className="mt-1">{t('listing.listingId')}: {listing.id.slice(0, 8)}...</p>
             </div>
           </div>
         </div>
@@ -439,86 +432,63 @@ export default function ListingDetailPage() {
 
       {/* Offer Modal */}
       {isOfferModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">{t('listing.offer.title')}</h2>
-                <button
-                  onClick={() => setIsOfferModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-bold mb-6">{t('listing.offer.title')}</h2>
+            <form onSubmit={handleOfferSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('listing.offer.name')}
+                </label>
+                <input
+                  type="text"
+                  value={offerData.buyerName}
+                  onChange={(e) => setOfferData({ ...offerData, buyerName: e.target.value })}
+                  className="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
               </div>
-
-              <form onSubmit={handleOfferSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('listing.offer.yourName')}
-                  </label>
-                  <input
-                    type="text"
-                    value={offerData.buyerName}
-                    onChange={(e) => setOfferData({...offerData, buyerName: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('listing.offer.yourEmail')}
-                  </label>
-                  <input
-                    type="email"
-                    value={offerData.buyerEmail}
-                    onChange={(e) => setOfferData({...offerData, buyerEmail: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('listing.offer.yourOffer')}
-                  </label>
-                  <input
-                    type="number"
-                    value={offerData.offerPrice}
-                    onChange={(e) => setOfferData({...offerData, offerPrice: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    min="1"
-                    step="0.01"
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Asking price: €{listing.price}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('listing.offer.message')}
-                  </label>
-                  <textarea
-                    value={offerData.message}
-                    onChange={(e) => setOfferData({...offerData, message: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    rows={3}
-                    placeholder="Any questions or additional details..."
-                  />
-                </div>
-
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('listing.offer.price')}
+                </label>
+                <input
+                  type="number"
+                  value={offerData.offerPrice}
+                  onChange={(e) => setOfferData({ ...offerData, offerPrice: e.target.value })}
+                  className="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('listing.offer.message')}
+                </label>
+                <textarea
+                  value={offerData.message}
+                  onChange={(e) => setOfferData({ ...offerData, message: e.target.value })}
+                  className="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div className="flex gap-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsOfferModalOpen(false)}
+                  className="flex-1 bg-gray-100 text-gray-800 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
                 <button
                   type="submit"
                   disabled={isSubmittingOffer}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50"
                 >
-                  {isSubmittingOffer ? t('listing.offer.submitting') : t('listing.offer.submit')}
+                  {isSubmittingOffer ? t('common.submitting') : t('common.submit')}
                 </button>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       )}

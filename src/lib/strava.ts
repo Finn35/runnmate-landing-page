@@ -14,6 +14,14 @@ interface StravaTokens {
   token_expires_at: string
 }
 
+interface RefreshTokenResult {
+  success: boolean;
+  access_token?: string;
+  refresh_token?: string;
+  expires_at?: string;
+  error?: string;
+}
+
 /**
  * Helper function to handle build-time API route requests
  */
@@ -118,6 +126,47 @@ async function refreshStravaTokens(userEmail: string, refreshToken: string): Pro
     access_token: tokenData.access_token,
     refresh_token: tokenData.refresh_token,
     token_expires_at: new Date(tokenData.expires_at * 1000).toISOString()
+  }
+}
+
+export async function refreshStravaToken(refreshToken: string): Promise<RefreshTokenResult> {
+  try {
+    const response = await fetch('https://www.strava.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: process.env.STRAVA_CLIENT_ID,
+        client_secret: process.env.STRAVA_CLIENT_SECRET,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Strava token refresh failed:', errorText);
+      return {
+        success: false,
+        error: errorText
+      };
+    }
+
+    const data = await response.json();
+    
+    return {
+      success: true,
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: new Date(data.expires_at * 1000).toISOString()
+    };
+  } catch (error) {
+    console.error('Error refreshing Strava token:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 }
 

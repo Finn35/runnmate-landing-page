@@ -1,119 +1,57 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from './database.types';
 
-// Create a dummy client for build time
-const createDummyClient = () => {
-  const baseResponse = { 
-    data: null, 
-    error: null,
-    status: 200,
-    statusText: 'OK'
-  };
+// Check environment variables
+const missingVars = [];
 
-  const createChainMethods = () => {
-    const methods = {
-      select: () => {
-        const result = Promise.resolve(baseResponse);
-        Object.assign(result, methods);
-        return result;
-      },
-      eq: () => methods,
-      neq: () => methods,
-      gt: () => methods,
-      gte: () => methods,
-      lt: () => methods,
-      lte: () => methods,
-      in: () => methods,
-      match: () => methods,
-      single: () => Promise.resolve(baseResponse),
-      update: () => Promise.resolve(baseResponse),
-      upsert: () => Promise.resolve(baseResponse),
-      delete: () => Promise.resolve(baseResponse),
-      order: () => methods,
-      limit: () => methods
-    };
-    return methods;
-  };
-
-  return {
-    from: () => createChainMethods(),
-    auth: {
-      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-      signOut: () => Promise.resolve({ error: null }),
-      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } }, error: null })
-    }
-  };
-};
-
-// Validate Supabase URL
-const validateSupabaseUrl = (url: string | undefined): string => {
-  if (!url) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL is not defined');
-  }
-
-  try {
-    // Ensure URL has protocol
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = `https://${url}`;
-    }
-    
-    // Test if it's a valid URL
-    new URL(url);
-    return url;
-  } catch (error) {
-    console.error('Invalid Supabase URL:', error);
-    throw new Error('Invalid NEXT_PUBLIC_SUPABASE_URL format');
-  }
-};
-
-// Initialize Supabase client
-const initSupabase = () => {
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
-  }
-
-  const supabaseUrl = validateSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseAnonKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined');
-  }
-
-  return createClient<Database>(supabaseUrl, supabaseAnonKey);
-};
-
-// Initialize admin client
-const initSupabaseAdmin = () => {
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
-  }
-
-  const supabaseUrl = validateSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseServiceKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not defined');
-  }
-
-  return createClient<Database>(supabaseUrl, supabaseServiceKey);
-};
-
-// Initialize clients with error handling
-let supabase: ReturnType<typeof createClient<Database>>;
-let supabaseAdmin: ReturnType<typeof createClient<Database>>;
-
-try {
-  supabase = initSupabase();
-  supabaseAdmin = initSupabaseAdmin();
-} catch (error) {
-  console.error('Failed to initialize Supabase clients:', error);
-  // Provide fallback clients that will return errors
-  supabase = createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
-  supabaseAdmin = createDummyClient() as unknown as ReturnType<typeof createClient<Database>>;
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  missingVars.push('NEXT_PUBLIC_SUPABASE_URL');
 }
 
-export { supabase, supabaseAdmin };
+if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  missingVars.push('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+}
+
+if (missingVars.length > 0) {
+  console.error('Missing required environment variables:', missingVars);
+  throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+}
+
+// TypeScript type assertion since we've checked these exist
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+
+console.log('Initializing Supabase client with:', {
+  url: supabaseUrl,
+  hasAnonKey: !!supabaseAnonKey
+});
+
+// Create the main client with anon key
+export const supabase = createClient<Database>(
+  supabaseUrl,
+  supabaseAnonKey,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  }
+);
+
+// Test the connection
+(async () => {
+  try {
+    const { error } = await supabase.from('listings').select('count').single();
+    if (error) {
+      console.error('Failed to connect to Supabase:', error);
+    } else {
+      console.log('Successfully connected to Supabase');
+    }
+  } catch (err: unknown) {
+    console.error('Unexpected error testing Supabase connection:', err);
+  }
+})();
 
 // Database types for TypeScript support
 export interface Listing {

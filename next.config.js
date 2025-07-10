@@ -7,7 +7,15 @@ const nextConfig = {
     ignoreDuringBuilds: true // Ignore ESLint errors during build
   },
   images: {
-    domains: ['images.unsplash.com'],
+    domains: [
+      'images.unsplash.com',
+      'via.placeholder.com',
+      'i.imgur.com',
+      'imgur.com',
+      'res.cloudinary.com',
+      'storage.googleapis.com',
+      'uydnxdxkjhrevyxajxya.supabase.co'
+    ],
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],

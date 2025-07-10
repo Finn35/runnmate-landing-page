@@ -11,7 +11,6 @@ import { LoadingCard, LoadingSection } from '@/components/ui/loading'
 import { Search, SHOE_SUGGESTIONS } from '@/components/ui/search'
 import { useToastHelpers } from '@/components/ui/toast'
 import { Pagination, PaginationInfo } from '@/components/ui/pagination'
-import Logo from '@/components/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 interface Listing {
@@ -30,58 +29,6 @@ interface Listing {
   gender?: string
   created_at: string
 }
-
-// Mock data for when Supabase is not available
-const MOCK_LISTINGS = [
-  {
-    id: '1',
-    title: 'Nike Air Zoom Pegasus 39',
-    brand: 'Nike',
-    size: 42,
-    condition: 'Excellent',
-    price: 85,
-    country: 'Netherlands',
-    city: 'Amsterdam',
-    cleaning_status: 'cleaned',
-    description: 'Great condition running shoes, barely used.',
-    image_urls: ['https://via.placeholder.com/400x300?text=Nike+Pegasus'],
-    seller_email: 'seller1@example.com',
-    gender: 'Men',
-    created_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    title: 'Adidas Ultraboost 22',
-    brand: 'Adidas',
-    size: 41,
-    condition: 'Good',
-    price: 75,
-    country: 'France',
-    city: 'Paris',
-    cleaning_status: 'not_cleaned',
-    description: 'Comfortable shoes with some wear on the sole.',
-    image_urls: ['https://via.placeholder.com/400x300?text=Adidas+Ultraboost'],
-    seller_email: 'seller2@example.com',
-    gender: 'Women',
-    created_at: '2024-01-14T15:30:00Z'
-  },
-  {
-    id: '3',
-    title: 'Hoka Clifton 8',
-    brand: 'Hoka',
-    size: 44,
-    condition: 'New',
-    price: 120,
-    country: 'Germany',
-    city: 'Berlin',
-    cleaning_status: 'cleaned',
-    description: 'Brand new, never worn outside.',
-    image_urls: ['https://via.placeholder.com/400x300?text=Hoka+Clifton'],
-    seller_email: 'seller3@example.com',
-    gender: 'Men',
-    created_at: '2024-01-13T09:15:00Z'
-  }
-]
 
 interface OfferModalProps {
   listing: Listing | null
@@ -249,6 +196,8 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
   onBuyNow: (listing: Listing) => void
 }) {
   const { t } = useLanguage()
+  const [imageError, setImageError] = useState(false)
+  
   const getConditionColor = (condition: string) => {
     switch (condition.toLowerCase()) {
       case 'new': return 'bg-green-100 text-green-800'
@@ -259,52 +208,41 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
     }
   }
 
-  const getCleaningIcon = (status?: string) => {
-    switch (status) {
-      case 'cleaned': return '✅'
-      case 'not_cleaned': return '⭕'
-      case 'buyer_choice': return '🤝'
-      default: return ''
+  // Log image URLs for debugging
+  useEffect(() => {
+    if (listing.image_urls && listing.image_urls.length > 0) {
+      console.log('Image URLs for listing:', listing.title, listing.image_urls);
     }
-  }
+  }, [listing]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
       {/* Image */}
-      <div className="aspect-square relative bg-gray-100">
-        <Image
-          src={listing.image_urls[0] || '/placeholder-shoe.jpg'}
-          alt={`${listing.title} - Size ${listing.size}`}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          quality={80}
-          placeholder="blur"
-          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-        />
-        
-        {/* Badges */}
-        <div className="absolute top-2 left-2 space-y-1">
-          <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getConditionColor(listing.condition)}`}>
-            {listing.condition}
-          </span>
-          {listing.cleaning_status && (
-            <div className="flex">
-              <span className="bg-white bg-opacity-90 text-gray-800 text-xs px-2 py-1 rounded-full font-medium">
-                {getCleaningIcon(listing.cleaning_status)} {listing.cleaning_status === 'cleaned' ? 'Clean' : listing.cleaning_status === 'not_cleaned' ? 'Not Cleaned' : 'Buyer Choice'}
-              </span>
-            </div>
-          )}
+      {!imageError && listing.image_urls && listing.image_urls.length > 0 && (
+        <div className="relative w-full h-48">
+          <Image
+            src={listing.image_urls[0]}
+            alt={listing.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={() => {
+              console.error('Failed to load image:', listing.image_urls[0]);
+              setImageError(true);
+            }}
+          />
         </div>
-
-        {/* Price badge */}
-        <div className="absolute top-2 right-2">
-          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-            €{listing.price}
-          </span>
+      )}
+      
+      {/* Fallback for missing/error images */}
+      {(imageError || !listing.image_urls || listing.image_urls.length === 0) && (
+        <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+          <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
         </div>
-      </div>
-
+      )}
+      
       {/* Content */}
       <div className="p-4">
         <div className="mb-3">
@@ -312,8 +250,11 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
             {listing.title}
           </h3>
           <p className="text-sm text-gray-600">
-            {listing.brand} • {listing.gender ? `${listing.gender}'s` : ''} Size {listing.size} • {listing.city}, {listing.country}
+            {listing.brand} • Size {listing.size}
           </p>
+          <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getConditionColor(listing.condition)} mt-2`}>
+            {listing.condition}
+          </span>
         </div>
 
         {listing.description && (
@@ -322,15 +263,6 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
           </p>
         )}
 
-        {/* Seller Verification */}
-        {/* Temporarily disabled 
-        {listing.seller_email && (
-          <div className="mb-3">
-            <StravaVerificationBadge userEmail={listing.seller_email} />
-          </div>
-        )}
-        */}
-
         {/* Buttons */}
         <div className="space-y-2">
           {/* Primary Action - Buy Now */}
@@ -338,7 +270,7 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
             onClick={() => onBuyNow(listing)}
             className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
           >
-{t('browse.actions.buyNow')} - €{listing.price}
+            {t('browse.actions.buyNow')} - €{listing.price}
           </button>
           
           {/* Secondary Actions */}
@@ -347,13 +279,13 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
               onClick={() => onViewDetails(listing)}
               className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
             >
-{t('browse.actions.details')}
+              {t('browse.actions.details')}
             </button>
             <button
               onClick={() => onSendOffer(listing)}
               className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
             >
-{t('browse.actions.makeOffer')}
+              {t('browse.actions.makeOffer')}
             </button>
           </div>
         </div>
@@ -364,7 +296,7 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
 
 export default function BrowsePage() {
   const router = useRouter()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage();
   const toast = useToastHelpers()
   
   const [listings, setListings] = useState<Listing[]>([])
@@ -399,35 +331,62 @@ export default function BrowsePage() {
     checkAuth()
   }, [])
 
-  // Load listings
-  useEffect(() => {
-    loadListings()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   const loadListings = async () => {
     try {
       setIsLoading(true)
+      
+      console.log('Starting to load listings...');
+
+      // First check if we can connect
+      const { data: testData, error: testError } = await supabase
+        .from('listings')
+        .select('count');
+
+      if (testError) {
+        console.error('Database connection error:', testError);
+        toast.error('Failed to connect to database', testError.message);
+        return;
+      }
+
+      console.log('Database connection test successful, count:', testData);
+
+      // Now get the actual listings
       const { data, error } = await supabase
         .from('listings')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading listings:', error)
-        toast.warning('Using demo data', 'Could not connect to database. Showing sample listings.')
-        setListings(MOCK_LISTINGS)
-        return
+        console.error('Error fetching listings:', error);
+        toast.error('Failed to fetch listings', error.message);
+        return;
       }
 
-      setListings(data || [])
-    } catch (error) {
-      console.error('Error loading listings:', error)
-      toast.warning('Using demo data', 'Could not connect to database. Showing sample listings.')
-      setListings(MOCK_LISTINGS)
+      if (!data || data.length === 0) {
+        console.log('No listings found in database');
+        setListings([]);
+        return;
+      }
+
+      console.log('Successfully fetched listings:', {
+        count: data.length,
+        firstListing: data[0],
+        lastListing: data[data.length - 1]
+      });
+
+      setListings(data);
+    } catch (err) {
+      console.error('Unexpected error in loadListings:', err);
+      toast.error('Unexpected error', err instanceof Error ? err.message : 'Unknown error');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
+
+  // Load listings on mount
+  useEffect(() => {
+    loadListings()
+  }, [])
 
   // Combined filtering logic
   const filteredListings = useMemo(() => {
@@ -586,7 +545,7 @@ export default function BrowsePage() {
         <header className="bg-white shadow-sm sticky top-0 z-50">
           <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
             <Link href="/" className="flex items-center">
-              <Logo size="md" />
+              {/* Removed Logo component */}
             </Link>
             
             <nav className="flex items-center space-x-6">
@@ -612,194 +571,187 @@ export default function BrowsePage() {
   const uniqueSizes = Array.from(new Set(listings.map(l => l.size))).sort((a, b) => a - b)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-          <Link href="/" className="flex items-center">
-            <Logo size="md" />
-          </Link>
-          <nav className="flex items-center space-x-6">
-            <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">{t('header.home')}</Link>
-            <Link href="/sell" className="text-gray-700 hover:text-blue-600 transition-colors">{t('header.sell')}</Link>
-            <Link href="/browse" className="text-blue-600 font-medium">{t('header.browse')}</Link>
-          </nav>
-        </div>
-      </header>
+    <div className="container mx-auto px-4 py-6">
+      {/* Search */}
+      <div className="mb-6">
+        <Search
+          placeholder={t('browse.search')}
+          value={searchQuery}
+          onSearch={setSearchQuery}
+          className="w-full"
+        />
+      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          {/* Search */}
-          <div className="max-w-2xl">
-            <Search
-              placeholder={t('browse.filters.searchPlaceholder')}
-              onSearch={setSearchQuery}
-              value={searchQuery}
-              showSuggestions={true}
-              suggestions={SHOE_SUGGESTIONS}
-            />
-          </div>
-          {/* Filters */}
-          <div className="flex flex-wrap gap-4 items-center">
-            {/* Size Filter */}
+      {/* Filters */}
+      <div className="mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Size Filter */}
+          <div>
             <select
               value={filters.size}
-              onChange={(e) => setFilters(prev => ({ ...prev, size: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              onChange={(e) => setFilters({ ...filters, size: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{t('browse.filters.allSizes')}</option>
-              {uniqueSizes.map(size => (
-                <option key={String(size)} value={String(size)}>
-                  {t('browse.filters.size', { size: String(size) })}
-                </option>
+              {Array.from({ length: 20 }, (_, i) => i + 35).map(size => (
+                <option key={size} value={size}>{size}</option>
               ))}
             </select>
-            {/* Brand Filter */}
+          </div>
+
+          {/* Brand Filter */}
+          <div>
             <select
               value={filters.brand}
-              onChange={(e) => setFilters(prev => ({ ...prev, brand: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              onChange={(e) => setFilters({ ...filters, brand: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{t('browse.filters.allBrands')}</option>
-              {uniqueBrands.map(brand => (
-                <option key={brand} value={brand}>{brand}</option>
-              ))}
+              <option value="Nike">Nike</option>
+              <option value="Adidas">Adidas</option>
+              <option value="ASICS">ASICS</option>
+              <option value="Brooks">Brooks</option>
+              <option value="Hoka">Hoka</option>
+              <option value="Other">Other</option>
             </select>
-            {/* Country Filter */}
+          </div>
+
+          {/* Country Filter */}
+          <div>
             <select
               value={filters.country}
-              onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{t('browse.filters.allCountries')}</option>
-              {uniqueCountries.map(country => (
-                <option key={country} value={country}>{country}</option>
-              ))}
+              <option value="NL">Netherlands</option>
+              <option value="BE">Belgium</option>
+              <option value="DE">Germany</option>
             </select>
-            {/* Gender Filter */}
+          </div>
+
+          {/* Gender Filter */}
+          <div>
             <select
               value={filters.gender}
-              onChange={(e) => setFilters(prev => ({ ...prev, gender: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{t('browse.filters.allGenders')}</option>
-              <option value="Men">{t('browse.filters.mens')}</option>
-              <option value="Women">{t('browse.filters.womens')}</option>
-              <option value="Unisex">{t('browse.filters.unisex')}</option>
+              <option value="mens">Men's</option>
+              <option value="womens">Women's</option>
+              <option value="unisex">Unisex</option>
             </select>
-            {/* Price Range Filter */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="number"
-                placeholder={t('browse.filters.priceMin')}
-                value={filters.priceMin}
-                onChange={(e) => setFilters(prev => ({ ...prev, priceMin: e.target.value }))}
-                className="w-20 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                min="0"
-                step="5"
-              />
-              <span className="text-gray-500">-</span>
-              <input
-                type="number"
-                placeholder={t('browse.filters.priceMax')}
-                value={filters.priceMax}
-                onChange={(e) => setFilters(prev => ({ ...prev, priceMax: e.target.value }))}
-                className="w-20 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                min="0"
-                step="5"
-              />
-            </div>
-            {/* Cleaned Only Filter */}
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={filters.cleanedOnly}
-                onChange={(e) => setFilters(prev => ({ ...prev, cleanedOnly: e.target.checked }))}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">{t('browse.filters.onlyCleanedShoes')}</span>
-            </label>
-            {/* Clear Filters */}
-            {(searchQuery || filters.size || filters.brand || filters.country || filters.gender || filters.cleanedOnly || filters.priceMin || filters.priceMax) && (
-              <button
-                onClick={() => {
-                  setSearchQuery('')
-                  setFilters({ size: '', brand: '', country: '', gender: '', cleanedOnly: false, priceMin: '', priceMax: '' })
-                  setCurrentPage(1)
-                }}
-                className="px-3 py-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                {t('browse.filters.clearAll')}
-              </button>
-            )}
-          </div>
-          {/* Results count and pagination info */}
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              {filteredListings.length} {filteredListings.length === 1 ? t('browse.filters.shoe') : t('browse.filters.shoes')} {searchQuery && `${t('browse.filters.foundFor')} "${searchQuery}"`}
-            </div>
-            {totalPages > 1 && (
-              <PaginationInfo
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={filteredListings.length}
-                itemsPerPage={itemsPerPage}
-              />
-            )}
           </div>
         </div>
-        {/* Listings Grid */}
-        {paginatedListings.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-4xl mb-4">👟</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('browse.filters.noShoesFound')}</h3>
-            <p className="text-gray-600 mb-4">
-              {searchQuery || Object.values(filters).some(f => typeof f === 'string' ? f !== '' : f === true)
-                ? t('browse.filters.tryAdjusting')
-                : t('browse.filters.beFirst')}
-            </p>
-            <Link
-              href="/sell"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {t('browse.filters.sellYourShoes')}
-            </Link>
-          </div>
-        ) : (
-          <>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-               {paginatedListings.map(listing => (
-                 <ListingCard
-                   key={listing.id}
-                   listing={listing}
-                   onSendOffer={handleOfferClick}
-                   onViewDetails={handleViewDetails}
-                   onBuyNow={handleBuyNow}
-                 />
-               ))}
-             </div>
 
-             {/* Pagination */}
-             {totalPages > 1 && (
-               <div className="mt-8 flex flex-col items-center space-y-4">
-                 <Pagination
-                   currentPage={currentPage}
-                   totalPages={totalPages}
-                   onPageChange={setCurrentPage}
-                 />
-                 <PaginationInfo
-                   currentPage={currentPage}
-                   totalPages={totalPages}
-                   totalItems={filteredListings.length}
-                   itemsPerPage={itemsPerPage}
-                 />
-               </div>
-             )}
-           </>
-         )}
-      </main>
+        {/* Price Range and Cleaned Only */}
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
+          <div>
+            <input
+              type="number"
+              value={filters.priceMin}
+              onChange={(e) => setFilters({ ...filters, priceMin: e.target.value })}
+              placeholder={t('browse.filters.minPrice')}
+              min="0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <input
+              type="number"
+              value={filters.priceMax}
+              onChange={(e) => setFilters({ ...filters, priceMax: e.target.value })}
+              placeholder={t('browse.filters.maxPrice')}
+              min="0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          {/* Cleaned Only Filter */}
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="cleanedOnly"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              checked={filters.cleanedOnly}
+              onChange={(e) => setFilters({ ...filters, cleanedOnly: e.target.checked })}
+            />
+            <label htmlFor="cleanedOnly" className="ml-2">
+              <span className="text-sm text-gray-700">{t('browse.filters.onlyCleanedShoes')}</span>
+            </label>
+          </div>
+          <div className="text-right">
+            <button
+              onClick={() => setFilters({
+                size: '',
+                brand: '',
+                country: '',
+                gender: '',
+                cleanedOnly: false,
+                priceMin: '',
+                priceMax: ''
+              })}
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              {t('browse.filters.clearAll')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="mb-6">
+        <h2 className="text-lg">
+          {filteredListings.length} {t('browse.results.shoes')}
+        </h2>
+      </div>
+
+      {/* Listings Grid */}
+      {isLoading ? (
+        <LoadingSection />
+      ) : (
+        <>
+          {paginatedListings.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {paginatedListings.map(listing => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  onSendOffer={handleOfferClick}
+                  onViewDetails={handleViewDetails}
+                  onBuyNow={handleBuyNow}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {t('browse.filters.noShoesFound')}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {t('browse.filters.beFirst')}
+              </p>
+              <Link
+                href="/sell"
+                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {t('browse.filters.sellYourShoes')}
+              </Link>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filteredListings.length > itemsPerPage && (
+            <div className="mt-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       {/* Offer Modal */}
       <OfferModal

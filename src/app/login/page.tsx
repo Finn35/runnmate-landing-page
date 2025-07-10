@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
-import Logo from '@/components/Logo'
 import Link from 'next/link'
 
 function LoginForm() {
@@ -102,14 +101,6 @@ function LoginForm() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* Simple Logo */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-3">
-            <Logo size="xl" />
-          </div>
-          <p className="text-gray-500 text-sm">{t('login.tagline')}</p>
-        </div>
-
         {/* Clean Login Card */}
         <div className="bg-white py-8 px-6 shadow-lg sm:rounded-xl sm:px-10">
           <div className="text-center mb-8">
@@ -197,8 +188,9 @@ export default function LoginPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Logo size="xl" />
-          <p className="text-gray-600 mt-4">{t('common.loading')}</p>
+          <div className="animate-pulse">
+            <div className="h-8 w-32 bg-gray-200 rounded mx-auto"></div>
+          </div>
         </div>
       </div>
     }>
