@@ -75,7 +75,8 @@ export async function sendMagicLink(email: string, redirectTo?: string) {
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: finalRedirectTo
+        emailRedirectTo: finalRedirectTo,
+        shouldCreateUser: true
       }
     });
 
@@ -83,8 +84,15 @@ export async function sendMagicLink(email: string, redirectTo?: string) {
 
     // Send custom email using Resend
     if (data) {
-      // Construct magic link URL
-      const magicLink = `${supabaseUrl}/auth/v1/verify?type=magiclink&redirect_to=${encodeURIComponent(finalRedirectTo)}`;
+      // Get the email OTP token from the response
+      const emailOTP = (data as any).properties?.email_otp;
+      
+      if (!emailOTP) {
+        throw new Error('No email OTP received from Supabase');
+      }
+
+      // Construct magic link URL with the OTP token
+      const magicLink = `${finalRedirectTo}?token_hash=${emailOTP}&type=email`;
 
       await sendEmail({
         to: email,
