@@ -1,126 +1,102 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export interface Database {
   public: {
     Tables: {
-      listings: {
+      user_strava_verifications: {
         Row: {
-          id: string;
-          title: string;
-          brand: string;
-          size: number;
-          condition: string;
-          price: number;
-          description?: string;
-          image_urls: string[];
-          created_at: string;
-          cleaning_status?: string;
-          country: string;
-          city?: string;
-          seller_email?: string;
-          gender?: string;
-        };
+          id: string
+          user_email: string
+          strava_athlete_id: string
+          strava_athlete_name: string
+          access_token: {
+            encrypted: string
+            iv: string
+            authTag: string
+          }
+          refresh_token: {
+            encrypted: string
+            iv: string
+            authTag: string
+          }
+          token_expires_at: string
+          total_distance_km: number
+          total_activities: number
+          is_active: boolean
+          verified_at: string
+          disconnected_at: string | null
+          created_at: string
+          updated_at: string
+        }
         Insert: {
-          id?: string;
-          title: string;
-          brand: string;
-          size: number;
-          condition: string;
-          price: number;
-          description?: string;
-          image_urls?: string[];
-          created_at?: string;
-          cleaning_status?: string;
-          country?: string;
-          city?: string;
-          seller_email?: string;
-          gender?: string;
-        };
+          id?: string
+          user_email: string
+          strava_athlete_id: string
+          strava_athlete_name: string
+          access_token: {
+            encrypted: string
+            iv: string
+            authTag: string
+          }
+          refresh_token: {
+            encrypted: string
+            iv: string
+            authTag: string
+          }
+          token_expires_at: string
+          total_distance_km?: number
+          total_activities?: number
+          is_active?: boolean
+          verified_at?: string
+          disconnected_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
         Update: {
-          id?: string;
-          title?: string;
-          brand?: string;
-          size?: number;
-          condition?: string;
-          price?: number;
-          description?: string;
-          image_urls?: string[];
-          created_at?: string;
-          cleaning_status?: string;
-          country?: string;
-          city?: string;
-          seller_email?: string;
-          gender?: string;
-        };
-      };
-      offers: {
-        Row: {
-          id: string;
-          listing_id: string;
-          buyer_email: string;
-          buyer_name?: string;
-          offer_price: number;
-          message?: string;
-          status: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          listing_id: string;
-          buyer_email: string;
-          buyer_name?: string;
-          offer_price: number;
-          message?: string;
-          status?: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          listing_id?: string;
-          buyer_email?: string;
-          buyer_name?: string;
-          offer_price?: number;
-          message?: string;
-          status?: string;
-          created_at?: string;
-        };
-      };
-      launch_notifications: {
-        Row: {
-          id: string;
-          email: string;
-          lottery_consent?: boolean;
-          shoe_interest?: string;
-          signed_up_at?: string;
-          is_active?: boolean;
-          notified_at?: string;
-          lottery_winner?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Insert: {
-          id?: string;
-          email: string;
-          lottery_consent?: boolean;
-          shoe_interest?: string;
-          signed_up_at?: string;
-          is_active?: boolean;
-          notified_at?: string;
-          lottery_winner?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          email?: string;
-          lottery_consent?: boolean;
-          shoe_interest?: string;
-          signed_up_at?: string;
-          is_active?: boolean;
-          notified_at?: string;
-          lottery_winner?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-    };
-  };
+          id?: string
+          user_email?: string
+          strava_athlete_id?: string
+          strava_athlete_name?: string
+          access_token?: {
+            encrypted: string
+            iv: string
+            authTag: string
+          }
+          refresh_token?: {
+            encrypted: string
+            iv: string
+            authTag: string
+          }
+          token_expires_at?: string
+          total_distance_km?: number
+          total_activities?: number
+          is_active?: boolean
+          verified_at?: string
+          disconnected_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      has_valid_strava_verification: {
+        Args: {
+          p_user_email: string
+        }
+        Returns: boolean
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+  }
 } 

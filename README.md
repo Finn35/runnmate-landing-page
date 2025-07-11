@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Runnmate Landing Page
+
+A Next.js web application for connecting runners and giving running shoes a second life.
+
+## Features
+
+- Strava integration for runner verification
+- Secure token storage with encryption
+- Email notifications via Resend
+- Multi-language support (English/Dutch)
+- Modern UI with Tailwind CSS
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+3. Set up environment variables:
+   - Copy `.env.example` to `.env.local`
+   - Fill in your Supabase credentials
+   - Add your Strava API credentials
+   - Add your Resend API key
+   - Generate an encryption key:
+     ```bash
+     node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+     ```
+   - Add the generated key as `ENCRYPTION_KEY` in your `.env.local`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Database Setup
 
-## Learn More
+1. Run the migrations in your Supabase SQL editor:
+   - `database/strava_verification_migration.sql`
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Required environment variables:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
+- `STRAVA_CLIENT_ID`: Your Strava API client ID
+- `STRAVA_CLIENT_SECRET`: Your Strava API client secret
+- `RESEND_API_KEY`: Your Resend API key
+- `ENCRYPTION_KEY`: 32-byte hex key for encrypting Strava tokens
+- `NEXT_PUBLIC_SITE_URL`: Your site URL (for callbacks)
 
-## Deploy on Vercel
+## Security
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Strava tokens are encrypted at rest using AES-256-GCM
+- Row Level Security (RLS) policies protect user data
+- Environment variables are properly handled
+- API routes are protected against unauthorized access
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Development
+
+- Built with Next.js 14
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Supabase for backend and authentication
+- Strava API for runner verification
+- Resend for transactional emails
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details
