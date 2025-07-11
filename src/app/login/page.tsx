@@ -71,10 +71,17 @@ function LoginForm() {
     setIsLoading(true)
 
     try {
-      // Ensure we have a returnTo, defaulting to the lottery page if not specified
-      const redirectParams = new URLSearchParams(searchParams.toString())
-      if (!returnTo) {
-        redirectParams.set('returnTo', '/coming-soon')
+      // Build the redirect URL with all necessary parameters
+      const redirectParams = new URLSearchParams()
+      
+      // Add returnTo if provided, otherwise default to coming-soon
+      const finalReturnTo = returnTo || '/coming-soon'
+      redirectParams.set('returnTo', finalReturnTo)
+
+      // Add any message parameter if it exists
+      const message = searchParams.get('message')
+      if (message) {
+        redirectParams.set('message', message)
       }
 
       const redirectTo = `${window.location.origin}/auth/callback?${redirectParams.toString()}`
