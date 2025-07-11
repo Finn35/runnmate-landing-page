@@ -12,59 +12,54 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the hash from the URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        const refreshToken = hashParams.get('refresh_token')
+        // Get the URL parameters
+        const searchParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const returnTo = searchParams.get('returnTo');
+
+        // Check for Supabase auth response in hash
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
 
         if (accessToken && refreshToken) {
           // Set the session in Supabase
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
-            refresh_token: refreshToken,
-          })
+            refresh_token: refreshToken
+          });
 
           if (error) {
-            console.error('Error setting session:', error)
-            router.push('/login?error=auth_failed')
-            return
+            console.error('Error setting session:', error);
+            router.push('/login?error=auth_failed');
+            return;
           }
 
-          console.log('Successfully authenticated:', data.user?.email)
+          console.log('Successfully authenticated:', data.user?.email);
           
           // Show success state
-          setStep('success')
-          await new Promise(resolve => setTimeout(resolve, 1500))
+          setStep('success');
+          await new Promise(resolve => setTimeout(resolve, 1500));
           
           // Show redirecting state
-          setStep('redirecting')
-          await new Promise(resolve => setTimeout(resolve, 800))
-          
-          // Check URL parameters
-          const searchParams = new URLSearchParams(window.location.search)
-          const returnTo = searchParams.get('returnTo')
-          const message = searchParams.get('message')
+          setStep('redirecting');
+          await new Promise(resolve => setTimeout(resolve, 800));
 
-          // Handle different redirect scenarios
-          if (message === 'login_required' && returnTo) {
-            // User was trying to connect Strava, redirect back
-            router.push(returnTo)
-          } else if (returnTo) {
-            // General returnTo URL
-            router.push(returnTo)
+          // Handle redirect
+          if (returnTo) {
+            router.push(returnTo);
           } else {
-            // Default redirect to browse page
-            router.push('/browse')
+            // Default redirect to lottery page
+            router.push('/coming-soon');
           }
         } else {
-          console.error('No access token found in URL')
-          router.push('/login?error=invalid_link')
+          console.error('No auth tokens found in URL');
+          router.push('/login?error=invalid_link');
         }
       } catch (error) {
-        console.error('Auth callback error:', error)
-        router.push('/login?error=auth_failed')
+        console.error('Auth callback error:', error);
+        router.push('/login?error=auth_failed');
       }
-    }
+    };
 
     handleAuthCallback()
   }, [router])

@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { stravaVerificationTemplate, offerNotificationTemplate } from './email-templates'
 
 // Only initialize Resend on the server-side
 const getResendClient = () => {
@@ -27,7 +28,7 @@ export interface EmailData {
   subject: string
   html: string
   from?: string
-  replyTo?: string
+  reply_to?: string
 }
 
 export interface OfferEmailData {
@@ -50,7 +51,7 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
       to: emailData.to,
       subject: emailData.subject,
       html: emailData.html,
-      replyTo: emailData.replyTo || 'admin@runnmate.com'
+      reply_to: emailData.reply_to || 'admin@runnmate.com'
     })
     
     console.log('✅ Email sent successfully:', result.data?.id)
@@ -61,93 +62,14 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
   }
 }
 
-// Generate HTML email template for offer notifications
-export function generateOfferEmailHtml(data: OfferEmailData): string {
-  const discountPercentage = Math.round(((data.listingPrice - data.offerPrice) / data.listingPrice) * 100)
-  
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>New Offer on Your Running Shoes</title>
-      <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f3f4f6; }
-        .container { max-width: 600px; margin: 0 auto; background-color: white; }
-        .header { background-color: #2563eb; color: white; padding: 24px; text-align: center; }
-        .content { padding: 24px; }
-        .offer-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; }
-        .price { font-size: 24px; font-weight: bold; color: #2563eb; }
-        .discount { background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-        .button { display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; }
-        .footer { background-color: #f9fafb; padding: 16px; text-align: center; color: #6b7280; font-size: 14px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1 style="margin: 0;">🏃‍♂️ Runnmate</h1>
-          <p style="margin: 8px 0 0 0;">New Offer on Your Running Shoes!</p>
-        </div>
-        
-        <div class="content">
-          <h2>Great news! Someone wants to buy your shoes</h2>
-          
-          <div class="offer-card">
-            <h3 style="margin: 0 0 8px 0;">${data.listingTitle}</h3>
-            <p style="margin: 0; color: #6b7280;">Size EU ${data.listingSize}</p>
-            
-            <div style="margin: 16px 0;">
-              <p style="margin: 0; color: #6b7280;">Your asking price: €${data.listingPrice}</p>
-              <p style="margin: 4px 0 0 0;">
-                <span class="price">€${data.offerPrice}</span>
-                <span class="discount">${discountPercentage}% ${discountPercentage > 0 ? 'below' : 'above'} asking price</span>
-              </p>
-            </div>
-          </div>
-
-          <div style="margin: 24px 0;">
-            <h3>From: ${data.buyerName}</h3>
-            <p style="color: #6b7280;">Email: ${data.buyerEmail}</p>
-            ${data.message ? `<p style="background-color: #f8fafc; padding: 12px; border-radius: 6px; border-left: 4px solid #2563eb;">"${data.message}"</p>` : ''}
-          </div>
-
-          <div style="margin: 32px 0; text-align: center;">
-            <a href="mailto:${data.buyerEmail}?subject=Re: Offer for ${data.listingTitle}&body=Hi ${data.buyerName},%0D%0A%0D%0AThank you for your interest in my ${data.listingTitle}!%0D%0A%0D%0A" class="button">
-              Reply to Buyer
-            </a>
-          </div>
-
-          <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 24px;">
-            <p style="color: #6b7280; font-size: 14px;">
-              💡 <strong>Tip:</strong> Respond quickly! Buyers are more likely to complete the purchase when sellers are responsive.
-            </p>
-            <p style="color: #6b7280; font-size: 14px;">
-              📧 <strong>Need help?</strong> Reply to this email to reach our admin team at admin@runnmate.com
-            </p>
-          </div>
-        </div>
-
-        <div class="footer">
-          <p>You received this email because someone made an offer on your Runnmate listing.</p>
-          <p>Questions? Reply to this email or contact us at admin@runnmate.com</p>
-          <p>© 2024 Runnmate - Connecting runners across Europe</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `
-}
-
 // Send offer notification email to seller
 export async function sendOfferNotification(data: OfferEmailData): Promise<boolean> {
   const emailData: EmailData = {
     to: data.sellerEmail,
-    subject: `💰 New €${data.offerPrice} offer on your ${data.listingTitle}`,
-    html: generateOfferEmailHtml(data),
-    from: 'admin@runnmate.com',
-    replyTo: 'admin@runnmate.com'
+    subject: offerNotificationTemplate.subject(data.listingTitle, data.offerPrice),
+    html: offerNotificationTemplate.html(data),
+    from: 'Runnmate <admin@runnmate.com>',
+    reply_to: 'admin@runnmate.com'
   }
 
   return await sendEmail(emailData)
@@ -173,54 +95,7 @@ export async function sendAdminEmail(to: string, subject: string, htmlContent: s
   }
 }
 
-// Integration examples for popular email services:
-
-/*
-// RESEND (Recommended - simple and reliable)
-npm install resend
-
-import { Resend } from 'resend'
-const resend = new Resend(process.env.RESEND_API_KEY)
-
-export async function sendEmail(emailData: EmailData): Promise<boolean> {
-  try {
-    await resend.emails.send({
-      from: emailData.from || 'noreply@runnmate.com',
-      to: emailData.to,
-      subject: emailData.subject,
-      html: emailData.html
-    })
-    return true
-  } catch (error) {
-    console.error('Failed to send email:', error)
-    return false
-  }
-}
-*/
-
-/*
-// SENDGRID
-npm install @sendgrid/mail
-
-import sgMail from '@sendgrid/mail'
-sgMail.setApiKey(process.env.SENDGRID_API_KEY!)
-
-export async function sendEmail(emailData: EmailData): Promise<boolean> {
-  try {
-    await sgMail.send({
-      from: emailData.from || 'noreply@runnmate.com',
-      to: emailData.to,
-      subject: emailData.subject,
-      html: emailData.html
-    })
-    return true
-  } catch (error) {
-    console.error('Failed to send email:', error)
-    return false
-  }
-}
-*/ 
-
+// Send Strava verification email
 export async function sendVerificationEmail(email: string, data: VerificationEmailData) {
   try {
     const resend = getResendClient()
@@ -228,21 +103,8 @@ export async function sendVerificationEmail(email: string, data: VerificationEma
     const result = await resend.emails.send({
       from: 'Runnmate <verification@runnmate.com>',
       to: email,
-      subject: 'Strava Account Connected Successfully',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Strava Account Connected!</h2>
-          <p>Hi ${data.name},</p>
-          <p>Your Strava account has been successfully connected to Runnmate. We've verified your running history:</p>
-          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 0; font-size: 18px; color: #2563eb;">
-              <strong>Total Distance: ${data.totalDistance} km</strong>
-            </p>
-          </div>
-          <p>You can now use your verified runner status on Runnmate!</p>
-          <p>Best regards,<br>The Runnmate Team</p>
-        </div>
-      `
+      subject: stravaVerificationTemplate.subject,
+      html: stravaVerificationTemplate.html(data.name, data.totalDistance)
     })
     
     console.log('Verification email sent successfully:', result)

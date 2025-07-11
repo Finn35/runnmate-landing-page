@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from './database.types';
+import { authEmailTemplates } from './auth-email-templates';
+import { sendEmail } from './email-service';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 // Check environment variables
 const missingVars = [];
@@ -46,7 +49,8 @@ export const supabase = createClient<Database>(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      flowType: 'pkce'
     }
   }
 );
@@ -60,6 +64,44 @@ export const supabaseAdmin = supabaseServiceKey
       }
     })
   : null;
+
+// Custom email handler for magic link authentication
+export async function sendMagicLink(email: string, redirectTo?: string) {
+  try {
+    // Get the redirect URL
+    const finalRedirectTo = redirectTo || `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`;
+
+    // Generate magic link using Supabase
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: finalRedirectTo
+      }
+    });
+
+    if (error) throw error;
+
+    // Send custom email using Resend
+    if (data) {
+      // Construct magic link URL
+      const magicLink = `${supabaseUrl}/auth/v1/verify?type=magiclink&redirect_to=${encodeURIComponent(finalRedirectTo)}`;
+
+      await sendEmail({
+        to: email,
+        subject: authEmailTemplates.magicLink.subject,
+        html: authEmailTemplates.magicLink.html(magicLink, email),
+        from: 'Runnmate <admin@runnmate.com>'
+      });
+
+      console.log('✅ Magic link email sent via Resend');
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error sending magic link:', error);
+    return { data: null, error };
+  }
+}
 
 // Test the connection
 (async () => {
