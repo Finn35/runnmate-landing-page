@@ -653,8 +653,8 @@ export default function BrowsePage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{t('browse.filters.allGenders')}</option>
-              <option value="mens">Men's</option>
-              <option value="womens">Women's</option>
+              <option value="mens">Men&apos;s</option>
+              <option value="womens">Women&apos;s</option>
               <option value="unisex">Unisex</option>
             </select>
           </div>
