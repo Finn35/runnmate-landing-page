@@ -1,68 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { handleBuildTimeRequest } from '@/lib/strava'
-import { PostgrestSingleResponse } from '@supabase/supabase-js'
-
-interface StravaVerification {
-  access_token: string
-  strava_athlete_id: string
-}
+import { decryptToken } from '@/lib/token-encryption'
 
 export async function POST(request: NextRequest) {
-  // Skip during build time
-  const buildTimeResponse = handleBuildTimeRequest()
-  if (buildTimeResponse) return buildTimeResponse
-
   try {
-    const { userEmail } = await request.json()
-    
-    if (!userEmail) {
-      return NextResponse.json({ error: 'User email required' }, { status: 400 })
+    console.log('Starting Strava disconnect...')
+
+    // Parse and validate request body
+    let userEmail: string
+    try {
+      const body = await request.json()
+      userEmail = body.userEmail
+
+      if (!userEmail) {
+        return NextResponse.json(
+          { error: 'User email is required' },
+          { status: 400 }
+        )
+      }
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid request format' },
+        { status: 400 }
+      )
     }
-    
-    // Get the user's Strava data to revoke access token
-    const { data: stravaData, error: fetchError } = await ((supabase
-      .from('user_strava_verifications') as any)
-      .select('access_token, strava_athlete_id')
+
+    // Get the user's Strava verification
+    const { data: verification, error: fetchError } = await supabase
+      .from('user_strava_verifications')
+      .select('access_token')
       .eq('user_email', userEmail)
       .eq('is_active', true)
-      .single() as Promise<PostgrestSingleResponse<StravaVerification>>)
-    
-    if (fetchError || !stravaData) {
-      return NextResponse.json({ error: 'Strava verification not found' }, { status: 404 })
+      .single()
+
+    if (fetchError || !verification) {
+      return NextResponse.json(
+        { error: 'Strava verification not found' },
+        { status: 404 }
+      )
     }
-    
-    // Revoke access token with Strava (optional but recommended)
+
+    // Decrypt the access token
+    let accessToken: string | undefined
     try {
-      await fetch('https://www.strava.com/oauth/deauthorize', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${stravaData.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      })
-    } catch (revokeError) {
-      console.warn('Failed to revoke Strava token:', revokeError)
-      // Continue anyway as we'll disable it in our database
+      const encryptedData = JSON.parse(verification.access_token)
+      accessToken = decryptToken(encryptedData)
+    } catch (error) {
+      console.error('Failed to decrypt access token:', error)
+      // Continue with deauthorization even if decryption fails
     }
-    
-    // Deactivate the verification in our database
-    const { error: updateError } = await ((supabase
-      .from('user_strava_verifications') as any)
-      .update({ 
+
+    // Attempt to deauthorize with Strava if we have a valid token
+    if (accessToken) {
+      try {
+        const response = await fetch('https://www.strava.com/oauth/deauthorize', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        })
+
+        if (!response.ok) {
+          console.warn('Strava deauthorization failed:', await response.text())
+          // Continue with local disconnection even if Strava API call fails
+        }
+      } catch (error) {
+        console.warn('Error calling Strava deauthorize endpoint:', error)
+        // Continue with local disconnection even if Strava API call fails
+      }
+    }
+
+    // Mark verification as inactive in database
+    const { error: updateError } = await supabase
+      .from('user_strava_verifications')
+      .update({
         is_active: false,
         disconnected_at: new Date().toISOString()
       })
-      .eq('user_email', userEmail))
-    
+      .eq('user_email', userEmail)
+
     if (updateError) {
-      return NextResponse.json({ error: 'Failed to disconnect Strava' }, { status: 500 })
+      console.error('Failed to update verification:', updateError)
+      return NextResponse.json(
+        { error: 'Failed to disconnect' },
+        { status: 500 }
+      )
     }
-    
-    return NextResponse.json({ success: true, message: 'Strava disconnected successfully' })
-    
+
+    return NextResponse.json({
+      success: true,
+      message: 'Successfully disconnected from Strava'
+    })
+
   } catch (error) {
-    console.error('Strava disconnect error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Unexpected error during Strava disconnect:', error)
+    return NextResponse.json(
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    )
   }
 } 

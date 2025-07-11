@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { handleBuildTimeRequest } from '@/lib/strava'
 import { sendVerificationEmail } from '@/lib/email-service'
+import { encryptToken } from '@/lib/token-encryption'
 import config from '@/lib/config'
 
 export async function GET(request: NextRequest) {
@@ -14,7 +15,8 @@ export async function GET(request: NextRequest) {
     console.log('Environment check:', {
       siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
       hasClientId: !!process.env.STRAVA_CLIENT_ID,
-      hasClientSecret: !!process.env.STRAVA_CLIENT_SECRET
+      hasClientSecret: !!process.env.STRAVA_CLIENT_SECRET,
+      hasEncryptionKey: !!process.env.ENCRYPTION_KEY
     })
 
     // Get the authorization code and state from the URL
@@ -71,6 +73,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${config.baseUrl}/profile?strava_error=token_exchange_failed&reason=${encodeURIComponent(tokenData.message || 'unknown')}`)
     }
 
+    // Encrypt tokens before storing
+    const encryptedAccessToken = encryptToken(tokenData.access_token)
+    const encryptedRefreshToken = encryptToken(tokenData.refresh_token)
+
     // Get athlete data to verify it's a runner
     console.log('Fetching athlete data...')
     const athleteResponse = await fetch('https://www.strava.com/api/v3/athlete', {
@@ -105,8 +111,8 @@ export async function GET(request: NextRequest) {
         user_email: state.email,
         strava_athlete_id: athleteData.id,
         strava_athlete_name: `${athleteData.firstname} ${athleteData.lastname}`,
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token,
+        access_token: JSON.stringify(encryptedAccessToken),
+        refresh_token: JSON.stringify(encryptedRefreshToken),
         token_expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
         total_distance_km: totalDistanceKm,
         total_activities: statsData.all_run_totals?.count || 0,
