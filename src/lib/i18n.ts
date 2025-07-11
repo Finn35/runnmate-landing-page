@@ -199,31 +199,27 @@ export const translations = {
     
     // Login page
     login: {
-      title: 'Welcome Back',
-      subtitle: 'Sign in to buy and sell running shoes',
-      emailPlaceholder: 'Enter your email',
-      sendLink: 'Send Magic Link',
-      checkEmail: 'Check your email for the magic link!',
-      checkSpam: 'Don\'t forget to check your spam folder.',
-      tagline: 'Europe\'s trusted running shoe marketplace',
+      welcome: 'Welcome to Runnmate',
       emailLabel: 'Email address',
-      secureLink: 'We\'ll send a secure link to your email - no password needed',
-      wantToSell: 'Want to sell instead?',
-      listYourShoes: 'List your shoes',
-      backToHome: '← Back to home',
+      emailPlaceholder: 'Enter your email',
+      sending: 'Sending...',
+      sendMagicLink: 'Send Magic Link',
+      noAccountNeeded: 'No account needed! Just enter your email and we\'ll send you a secure login link.',
+      checkSpam: 'Please check your spam folder if you don\'t see the email.',
       errors: {
-        authFailed: 'Authentication failed. Please try requesting a new magic link.',
-        invalidLink: 'Invalid or expired magic link. Please request a new one.',
-        expired: 'Magic link has expired. Please request a new one.',
-        generic: 'Something went wrong. Please try again.',
-        emailRequired: 'Please enter your email address',
+        emailRequired: 'Email is required',
         invalidEmail: 'Please enter a valid email address',
-        rateLimit: 'Too many requests. Please wait a few minutes before trying again.'
+        authFailed: 'Authentication failed. Please try again.',
+        invalidLink: 'Invalid or expired login link',
+        expired: 'Login link has expired',
+        generic: 'An error occurred. Please try again.',
+        rateLimit: 'Too many attempts. Please wait a few minutes and try again.'
       },
       messages: {
-        loginToBuy: 'Please sign in to buy shoes',
-        loginToMakeOffer: 'Please sign in to make an offer',
-        magicLinkSent: 'Magic link sent! Check your inbox and spam folder.'
+        magicLinkSent: 'Check your email for the login link!',
+        stravaLoginRequired: 'To connect your Strava account, please verify your email address first. We\'ll send you a secure login link to authenticate your identity and maintain our trusted running community.',
+        loginToMakeOffer: 'Please log in to make an offer on this item.',
+        loginToBuy: 'Please log in to purchase this item.'
       }
     },
     
@@ -580,31 +576,27 @@ export const translations = {
     
     // Login page
     login: {
-      title: 'Welkom Terug',
-      subtitle: 'Log in om hardloopschoenen te kopen en verkopen',
-      emailPlaceholder: 'Voer je email in',
-      sendLink: 'Verstuur Magic Link',
-      checkEmail: 'Controleer je email voor de magic link!',
-      checkSpam: 'Vergeet niet je spam folder te controleren.',
-      tagline: 'Europa\'s vertrouwde hardloopschoen marktplaats',
-      emailLabel: 'Email adres',
-      secureLink: 'We sturen een veilige link naar je email - geen wachtwoord nodig',
-      wantToSell: 'Wil je liever verkopen?',
-      listYourShoes: 'Zet je schoenen online',
-      backToHome: '← Terug naar home',
+      welcome: 'Welkom bij Runnmate',
+      emailLabel: 'E-mailadres',
+      emailPlaceholder: 'Voer je e-mailadres in',
+      sending: 'Verzenden...',
+      sendMagicLink: 'Stuur Inloglink',
+      noAccountNeeded: 'Geen account nodig! Voer je e-mailadres in en we sturen je een veilige inloglink.',
+      checkSpam: 'Controleer je spammap als je de e-mail niet ziet.',
       errors: {
-        authFailed: 'Authenticatie mislukt. Probeer een nieuwe magic link aan te vragen.',
-        invalidLink: 'Ongeldige of verlopen magic link. Vraag een nieuwe aan.',
-        expired: 'Magic link is verlopen. Vraag een nieuwe aan.',
-        generic: 'Er ging iets mis. Probeer opnieuw.',
-        emailRequired: 'Voer je emailadres in',
-        invalidEmail: 'Voer een geldig emailadres in',
-        rateLimit: 'Te veel verzoeken. Wacht een paar minuten voordat je het opnieuw probeert.'
+        emailRequired: 'E-mailadres is verplicht',
+        invalidEmail: 'Voer een geldig e-mailadres in',
+        authFailed: 'Authenticatie mislukt. Probeer het opnieuw.',
+        invalidLink: 'Ongeldige of verlopen inloglink',
+        expired: 'Inloglink is verlopen',
+        generic: 'Er is een fout opgetreden. Probeer het opnieuw.',
+        rateLimit: 'Te veel pogingen. Wacht een paar minuten en probeer het opnieuw.'
       },
       messages: {
-        loginToBuy: 'Log in om schoenen te kopen',
-        loginToMakeOffer: 'Log in om een bod uit te brengen',
-        magicLinkSent: 'Magic link verzonden! Controleer je inbox en spam folder.'
+        magicLinkSent: 'Controleer je e-mail voor de inloglink!',
+        stravaLoginRequired: 'Om je Strava-account te koppelen, moet je eerst je e-mailadres verifiëren. We sturen je een veilige inloglink om je identiteit te verifiëren en onze vertrouwde hardloopcommunity te behouden.',
+        loginToMakeOffer: 'Log in om een bod te doen op dit item.',
+        loginToBuy: 'Log in om dit item te kopen.'
       }
     },
     

@@ -16,7 +16,7 @@ export default function VoorwaardenPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Algemene Voorwaarden</h1>
-          <p className="text-sm text-gray-600 mb-8">Laatst bijgewerkt: [Datum invullen]</p>
+          <p className="text-sm text-gray-600 mb-8">Laatst bijgewerkt: 10 januari 2025</p>
 
           <div className="prose prose-gray max-w-none">
             <p className="text-lg text-gray-700 mb-6">
