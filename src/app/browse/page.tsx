@@ -464,10 +464,8 @@ export default function BrowsePage() {
       return
     }
 
-    const confirmed = confirm(`Are you sure you want to buy ${listing.title} for €${listing.price}?`)
-    if (confirmed) {
-      toast.success('Purchase confirmed!', 'The seller will contact you soon.')
-    }
+    // Redirect directly to coming-soon page with shoe info
+    router.push(`/coming-soon?shoe=${encodeURIComponent(listing.title)}`)
   }
 
   const handleOfferClick = (listing: Listing) => {

@@ -123,14 +123,9 @@ export default function ListingDetailPage() {
       return
     }
 
-    const confirmed = confirm(
-      t('listing.buyConfirmation.message')
-        .replace('{title}', listing?.title || '')
-        .replace('{price}', listing?.price?.toString() || '')
-    )
-    
-    if (confirmed) {
-      alert(t('listing.buyConfirmation.success'))
+    if (listing) {
+      // Redirect directly to coming-soon page with shoe info
+      window.location.href = `/coming-soon?shoe=${encodeURIComponent(listing.title)}`
     }
   }
 

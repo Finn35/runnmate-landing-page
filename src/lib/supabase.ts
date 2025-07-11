@@ -71,40 +71,25 @@ export async function sendMagicLink(email: string, redirectTo?: string) {
     // Get the redirect URL
     const finalRedirectTo = redirectTo || `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`;
 
-    // Generate magic link using Supabase
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: finalRedirectTo,
-        shouldCreateUser: true
-      }
+    // Call our API route to handle the magic link flow
+    const response = await fetch('/api/auth/magic-link', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        redirectTo: finalRedirectTo
+      })
     });
 
-    if (error) throw error;
+    const result = await response.json();
 
-    // Send custom email using Resend
-    if (data) {
-      // Get the email OTP token from the response
-      const emailOTP = (data as any).properties?.email_otp;
-      
-      if (!emailOTP) {
-        throw new Error('No email OTP received from Supabase');
-      }
-
-      // Construct magic link URL with the OTP token
-      const magicLink = `${finalRedirectTo}?token_hash=${emailOTP}&type=email`;
-
-      await sendEmail({
-        to: email,
-        subject: authEmailTemplates.magicLink.subject,
-        html: authEmailTemplates.magicLink.html(magicLink, email),
-        from: 'Runnmate <admin@runnmate.com>'
-      });
-
-      console.log('✅ Magic link email sent via Resend');
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to send magic link');
     }
 
-    return { data, error: null };
+    return { data: result, error: null };
   } catch (error) {
     console.error('Error sending magic link:', error);
     return { data: null, error };
