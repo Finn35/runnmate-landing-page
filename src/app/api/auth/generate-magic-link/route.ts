@@ -88,7 +88,7 @@ export async function POST(request: Request) {
       const lang = String(language || 'en');
       const emailSent = await sendEmail({
         to: email,
-        subject: authEmailTemplates.magicLink.subject[lang] || authEmailTemplates.magicLink.subject.en,
+        subject: authEmailTemplates.magicLink.subject[lang as 'en' | 'nl'] || authEmailTemplates.magicLink.subject.en,
         html: authEmailTemplates.magicLink.html(customMagicLink, email, lang),
         from: 'Runnmate <admin@runnmate.com>'
       })
