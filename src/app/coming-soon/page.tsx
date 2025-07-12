@@ -243,8 +243,8 @@ function ComingSoonForm() {
           )}
 
           <div className="text-gray-600 text-sm leading-relaxed mt-8 text-center">
-            <p className="font-semibold text-gray-900 mb-2">We&apos;ll make this right!</p>
-            <p>The shoe you wanted will be available for purchase the moment we launch. We&apos;ll send you a direct link when it&apos;s ready to buy.</p>
+            <p className="font-semibold text-gray-900 mb-2">{t('comingSoon.makeItRightTitle')}</p>
+            <p>{t('comingSoon.makeItRightDescription')}</p>
           </div>
         </div>
         </div>

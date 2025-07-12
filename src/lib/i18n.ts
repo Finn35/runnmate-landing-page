@@ -240,7 +240,9 @@ export const translations = {
       lotteryDetails: '2 winners • Drawn at launch • Our way of saying thanks for your patience',
       lotteryConsent: 'Yes, enter me in the lottery and send me launch updates via email',
       joinLottery: 'Join Lottery',
-      skipLottery: 'Just Updates'
+      skipLottery: 'Just Updates',
+      makeItRightTitle: "We'll make this right!",
+      makeItRightDescription: "The shoe you wanted will be available for purchase the moment we launch. We'll send you a direct link when it's ready to buy.",
     },
     
     // Auth callback
@@ -325,7 +327,7 @@ export const translations = {
       backToBrowse: '← Back to Browse',
       loading: 'Loading listing...',
       imageUnavailable: 'Image unavailable',
-      sizeEU: 'Size EU',
+      size: "Size",
       condition: 'Condition',
       localPickupAvailable: 'Local pickup available',
       description: 'Description',
@@ -617,7 +619,9 @@ export const translations = {
       lotteryDetails: '2 winnaars • Getrokken bij lancering • Onze manier om bedankt te zeggen voor je geduld',
       lotteryConsent: 'Ja, doe mij mee met de loterij en stuur me updates via email',
       joinLottery: 'Doe Mee',
-      skipLottery: 'Alleen Updates'
+      skipLottery: 'Alleen Updates',
+      makeItRightTitle: "We maken het goed!",
+      makeItRightDescription: "De schoen die je wilde kopen zal direct beschikbaar zijn zodra we lanceren. We sturen je een directe link zodra deze te koop is.",
     },
     
     // Auth callback
@@ -702,7 +706,7 @@ export const translations = {
       backToBrowse: '← Terug naar Overzicht',
       loading: 'Advertentie laden...',
       imageUnavailable: 'Afbeelding niet beschikbaar',
-      sizeEU: 'Maat EU',
+      size: "Maat",
       condition: 'Conditie',
       localPickupAvailable: 'Lokale ophaling mogelijk',
       description: 'Beschrijving',
