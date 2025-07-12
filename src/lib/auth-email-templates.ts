@@ -1,14 +1,43 @@
-// Email templates for authentication
+// Email templates for authentication with multi-language support
 export const authEmailTemplates = {
   magicLink: {
-    subject: 'Your Runnmate Login Link',
-    html: (link: string, email: string) => `
+    subject: {
+      en: 'Your Runnmate Login Link',
+      nl: 'Uw Runnmate Inloglink'
+    },
+    html: (link: string, email: string, lang: string = 'en') => {
+      const content = {
+        en: {
+          title: 'Your Secure Login Link',
+          welcome: 'Welcome to Runnmate!',
+          instruction: 'Click the button below to securely sign in to your account:',
+          button: 'Log in to Runnmate',
+          altText: 'If the button doesn\'t work, copy and paste this link into your browser:',
+          expire: 'This link will expire in 24 hours and can only be used once.',
+          footer: 'Thanks for using Runnmate!',
+          disclaimer: 'If you didn\'t request this login link, you can safely ignore this email.'
+        },
+        nl: {
+          title: 'Uw Veilige Inloglink',
+          welcome: 'Welkom bij Runnmate!',
+          instruction: 'Klik op de knop hieronder om veilig in te loggen op uw account:',
+          button: 'Inloggen bij Runnmate',
+          altText: 'Als de knop niet werkt, kopieer en plak deze link in uw browser:',
+          expire: 'Deze link verloopt over 24 uur en kan slechts één keer gebruikt worden.',
+          footer: 'Bedankt voor het gebruik van Runnmate!',
+          disclaimer: 'Als u deze inloglink niet heeft aangevraagd, kunt u deze e-mail veilig negeren.'
+        }
+      }
+      
+      const t = content[lang as keyof typeof content] || content.en
+      
+      return `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Your Runnmate Login Link</title>
+        <title>${t.title}</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f3f4f6; }
           .container { max-width: 600px; margin: 0 auto; background-color: white; }
@@ -22,20 +51,20 @@ export const authEmailTemplates = {
         <div class="container">
           <div class="header">
             <h1 style="margin: 0;">🏃‍♂️ Runnmate</h1>
-            <p style="margin: 8px 0 0 0;">Your Secure Login Link</p>
+            <p style="margin: 8px 0 0 0;">${t.title}</p>
           </div>
           
           <div class="content">
-            <h2>Welcome to Runnmate!</h2>
-            <p>Click the button below to securely sign in to your account. This link will expire in 24 hours.</p>
+            <h2>${t.welcome}</h2>
+            <p>${t.instruction}</p>
             
             <div style="margin: 32px 0; text-align: center;">
-              <a href="${link}" class="button">Sign In to Runnmate</a>
+              <a href="${link}" class="button">${t.button}</a>
             </div>
 
             <div style="margin-top: 24px;">
               <p style="color: #6b7280; font-size: 14px;">
-                If the button doesn't work, copy and paste this link into your browser:
+                ${t.altText}
                 <br>
                 <a href="${link}" style="color: #2563eb; word-break: break-all;">${link}</a>
               </p>
@@ -43,18 +72,22 @@ export const authEmailTemplates = {
 
             <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 24px;">
               <p style="color: #6b7280; font-size: 14px;">
-                🔒 <strong>Security Note:</strong> This link was requested for ${email}. If you didn't request this link, you can safely ignore this email.
+                🔒 <strong>${t.expire}</strong>
+              </p>
+              <p style="color: #6b7280; font-size: 14px;">
+                ${t.disclaimer}
               </p>
             </div>
           </div>
 
           <div class="footer">
-            <p>© 2024 Runnmate - Connecting runners across Europe</p>
+            <p>${t.footer}</p>
             <p>Questions? Contact us at admin@runnmate.com</p>
           </div>
         </div>
       </body>
       </html>
-    `
+      `
+    }
   }
-}; 
+} 
