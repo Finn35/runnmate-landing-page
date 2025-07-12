@@ -85,7 +85,7 @@ export async function POST(request: Request) {
       console.log('Custom magic link created:', customMagicLink)
 
       // Send our custom email with the converted link
-      const lang = (language || 'en').toString();
+      const lang = String(language || 'en');
       const emailSent = await sendEmail({
         to: email,
         subject: authEmailTemplates.magicLink.subject(lang),
