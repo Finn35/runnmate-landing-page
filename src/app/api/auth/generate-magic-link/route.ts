@@ -85,10 +85,11 @@ export async function POST(request: Request) {
       console.log('Custom magic link created:', customMagicLink)
 
       // Send our custom email with the converted link
+      const lang = (language || 'en').toString();
       const emailSent = await sendEmail({
         to: email,
-        subject: authEmailTemplates.magicLink.subject(language || 'en'),
-        html: authEmailTemplates.magicLink.html(customMagicLink, email, language || 'en'),
+        subject: authEmailTemplates.magicLink.subject(lang),
+        html: authEmailTemplates.magicLink.html(customMagicLink, email, lang),
         from: 'Runnmate <admin@runnmate.com>'
       })
 
