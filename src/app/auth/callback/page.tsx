@@ -18,33 +18,78 @@ export default function AuthCallback() {
         const type = searchParams.get('type')
         const returnTo = searchParams.get('returnTo') || '/'
 
-        if (!tokenHash || type !== 'email') {
-          console.error('Invalid callback URL')
-          setError('Invalid magic link')
+        console.log('Callback parameters:', { tokenHash: !!tokenHash, type, returnTo })
+
+        if (!tokenHash) {
+          console.error('No token_hash in callback URL')
+          setError('Invalid magic link - missing token')
           setStep('error')
           return
         }
 
-        // Verify the email OTP
-        const { error: verifyError } = await supabase.auth.verifyOtp({
+        if (!type || (type !== 'email' && type !== 'magiclink')) {
+          console.error('Invalid or missing type in callback URL:', type)
+          setError('Invalid magic link - invalid type')
+          setStep('error')
+          return
+        }
+
+        console.log('Verifying token with type:', type)
+
+        // Verify the token - handle both email OTP and magiclink types
+        const { data, error: verifyError } = await supabase.auth.verifyOtp({
           type: 'email',
           token_hash: tokenHash
         })
 
         if (verifyError) {
-          console.error('Error verifying OTP:', verifyError)
-          setError('Couldn&apos;t verify your login link. Please try again.')
+          console.error('Error verifying token:', verifyError)
+          
+          // Provide more specific error messages
+          if (verifyError.message?.includes('expired')) {
+            setError('Your login link has expired. Please request a new one.')
+          } else if (verifyError.message?.includes('invalid')) {
+            setError('Invalid login link. Please request a new one.')
+          } else {
+            setError('Couldn\'t verify your login link. Please try again.')
+          }
           setStep('error')
           return
         }
 
-        // Successfully verified
-        setStep('success')
-        
-        // Redirect after a short delay to show success message
-        setTimeout(() => {
-          router.push(returnTo)
-        }, 2000)
+        // Wait for session to be established
+        if (data.session) {
+          console.log('Session established:', data.session.user.email)
+          
+          // Successfully verified
+          setStep('success')
+          
+          // Force a session refresh to ensure it's properly established
+          await supabase.auth.getSession()
+          
+          // Redirect after a short delay to show success message
+          setTimeout(() => {
+            router.push(returnTo)
+          }, 1500)
+        } else {
+          // Sometimes session isn't immediately available, try to get it
+          console.log('Session not in verification response, checking current session...')
+          
+          const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+          
+          if (sessionData.session) {
+            console.log('Session found:', sessionData.session.user.email)
+            setStep('success')
+            
+            setTimeout(() => {
+              router.push(returnTo)
+            }, 1500)
+          } else {
+            console.error('No session created after verification', sessionError)
+            setError('Authentication failed. Please try again.')
+            setStep('error')
+          }
+        }
 
       } catch (err) {
         console.error('Error in auth callback:', err)
