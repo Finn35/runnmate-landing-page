@@ -363,7 +363,7 @@ export default function BrowsePage() {
     try {
       setIsLoading(true)
       
-      console.log('Starting to load listings...');
+      console.log('Loading listings for user:', user);
 
       // First check if we can connect
       const { data: testData, error: testError } = await supabase
@@ -379,12 +379,21 @@ export default function BrowsePage() {
       console.log('Database connection test successful, count:', testData);
 
       // Now get the actual listings
-      const { data, error } = await supabase
+      const { data, error, status } = await supabase
         .from('listings')
         .select('*')
         .order('created_at', { ascending: false });
 
+      console.log('Listings fetch result:', { status, error, data });
+
       if (error) {
+        // Handle invalid session: sign out and reload for public access
+        if (status === 401 || status === 403) {
+          toast.error('Session expired or invalid. Reloading as guest...');
+          await supabase.auth.signOut();
+          setTimeout(() => window.location.reload(), 1200); // Give user time to see toast
+          return;
+        }
         console.error('Error fetching listings:', error);
         toast.error('Failed to fetch listings', error.message);
         setListings([]); // Ensure listings is empty on error
@@ -417,6 +426,17 @@ export default function BrowsePage() {
   useEffect(() => {
     loadListings()
   }, [])
+
+  // Debug: Timeout fallback for loading
+  useEffect(() => {
+    if (isLoading) {
+      const timeout = setTimeout(() => {
+        toast.error('Loading is taking too long. Please refresh or try logging out and in again.');
+        setIsLoading(false);
+      }, 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading]);
 
   // Combined filtering logic
   const filteredListings = useMemo(() => {
