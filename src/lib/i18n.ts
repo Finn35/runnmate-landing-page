@@ -141,7 +141,8 @@ export const translations = {
         sellerEmail: 'Your Email',
         images: 'Images',
         required: 'Required fields',
-        submit: 'List Your Shoes'
+        submit: 'List Your Shoes',
+        authenticityConsent: 'I confirm that the shoes I intend to list are authentic and not replicas or counterfeit products.'
       },
       placeholders: {
         shoeName: 'e.g., Nike Air Zoom Pegasus 39',
@@ -511,16 +512,17 @@ export const translations = {
         shoeName: 'Schoennaam',
         brand: 'Merk',
         size: 'Maat (EU)',
-        condition: 'Conditie',
+        condition: 'Staat',
         price: 'Prijs (€)',
         cleaningStatus: 'Schoonmaakstatus',
         description: 'Beschrijving',
         country: 'Land',
         city: 'Stad',
-        sellerEmail: 'Jouw Email',
+        sellerEmail: 'Jouw e-mail',
         images: 'Afbeeldingen',
         required: 'Verplichte velden',
-        submit: 'Zet Je Schoenen Online'
+        submit: 'Schoenen aanbieden',
+        authenticityConsent: 'Ik bevestig dat de schoenen die ik wil aanbieden authentiek zijn en geen replica’s of namaakproducten.'
       },
       placeholders: {
         shoeName: 'bijv., Nike Air Zoom Pegasus 39',

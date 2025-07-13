@@ -2,12 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { supabase, sendMagicLink } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 function LoginForm() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -85,25 +85,40 @@ function LoginForm() {
       }
 
       const redirectTo = `${window.location.origin}/auth/callback?${redirectParams.toString()}`
-      const { error } = await sendMagicLink(email.trim(), redirectTo)
+      
+      // Generate magic link using server-side API (bypasses Supabase email)
+      const response = await fetch('/api/auth/generate-magic-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          redirectTo: redirectTo,
+          language: language
+        })
+      })
 
-      if (error) {
-        throw error
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to generate magic link')
       }
 
+      // Success - show message and clear email
       setMessage(t('login.messages.magicLinkSent'))
-      setEmail('') // Clear email after successful submission
+      setEmail('')
     } catch (error) {
       console.error('Login error:', error)
       
-      // Handle specific Supabase errors
+      // Handle errors
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
       if (errorMessage.includes('rate limit')) {
         setError(t('login.errors.rateLimit'))
       } else if (errorMessage.includes('invalid email')) {
         setError(t('login.errors.invalidEmail'))
       } else {
-        setError(errorMessage || t('login.errors.generic'))
+        setError(t('login.errors.generic'))
       }
     } finally {
       setIsLoading(false)

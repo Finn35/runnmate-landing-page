@@ -38,6 +38,9 @@ export default function SellPage() {
   const [stravaVerification, setStravaVerification] = useState<{ strava_athlete_name: string; total_distance_km: number; total_activities: number } | null>(null)
   const [isCheckingStrava, setIsCheckingStrava] = useState(false)
 
+  // Consent for authenticity
+  const [authenticityConsent, setAuthenticityConsent] = useState(false)
+
   // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
@@ -211,6 +214,11 @@ export default function SellPage() {
     
     if (!formData.title || !formData.brand || !formData.size || !formData.condition || !formData.price || !formData.sellerEmail) {
       toast.error('Missing required fields', 'Please fill in all required fields.')
+      return
+    }
+
+    if (!authenticityConsent) {
+      toast.error('Consent required', t('sell.form.authenticityConsent'))
       return
     }
 
@@ -695,6 +703,22 @@ export default function SellPage() {
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* Consent Checkbox */}
+            <div className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                id="authenticity-consent"
+                checked={authenticityConsent}
+                onChange={e => setAuthenticityConsent(e.target.checked)}
+                required
+                className="mt-1"
+                disabled={isSubmitting}
+              />
+              <label htmlFor="authenticity-consent" className="text-sm cursor-pointer select-none">
+                {t('sell.form.authenticityConsent')}
+              </label>
             </div>
 
             {/* Submit Button */}

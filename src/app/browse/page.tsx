@@ -247,8 +247,11 @@ function ListingCard({ listing, onSendOffer, onViewDetails, onBuyNow }: {
       {/* Content */}
       <div className="p-4">
         <div className="mb-3">
-          <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-1">
+          <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-1 flex items-center gap-2">
             {listing.title}
+            {listing.seller_email && (
+              <StravaVerificationBadge userEmail={listing.seller_email} iconOnly className="ml-2" />
+            )}
           </h3>
           <p className="text-sm text-gray-600">
             {listing.brand} • Size {listing.size}
@@ -330,6 +333,34 @@ export default function BrowsePage() {
       setUser(currentUser)
     }
     checkAuth()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed in browse page:', event, session?.user?.email)
+        if (event === 'SIGNED_IN' && session) {
+          const currentUser = await getCurrentUser()
+          console.log('User authenticated, setting user state:', currentUser?.email)
+          setUser(currentUser)
+        } else if (event === 'SIGNED_OUT') {
+          console.log('User signed out, clearing user state')
+          setUser(null)
+        }
+      }
+    )
+
+    // Also check auth when page becomes visible (user returns from login)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkAuth()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   const loadListings = async () => {
@@ -458,12 +489,15 @@ export default function BrowsePage() {
   }, [searchQuery, filters])
 
   const handleBuyNow = (listing: Listing) => {
+    console.log('handleBuyNow called - user state:', user?.email || 'not authenticated')
     if (!user) {
+      console.log('User not authenticated, redirecting to login')
       sessionStorage.setItem('auth_redirect', `/listing/${listing.id}`)
       router.push(`/login?message=login_to_buy`)
       return
     }
 
+    console.log('User authenticated, proceeding with buy now')
     // Redirect directly to coming-soon page with shoe info
     router.push(`/coming-soon?shoe=${encodeURIComponent(listing.title)}`)
   }

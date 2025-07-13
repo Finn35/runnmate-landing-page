@@ -65,7 +65,12 @@ export const supabaseAdmin = supabaseServiceKey
     })
   : null;
 
-// Custom email handler for magic link authentication
+// --- IMPORTANT: Only use the admin API flow in /api/auth/generate-magic-link for magic links ---
+// The following functions are deprecated and should NOT be used for authentication.
+// They are left here for reference but will trigger unwanted Supabase emails and OTP issues.
+
+/*
+// Deprecated: Do NOT use. Triggers Supabase emails.
 export async function sendMagicLink(email: string, redirectTo?: string) {
   try {
     // Get the redirect URL
@@ -131,7 +136,7 @@ export async function sendMagicLink(email: string, redirectTo?: string) {
   }
 }
 
-// Alternative approach: Use Supabase's built-in flow but with custom email
+// Deprecated: Do NOT use. Triggers Supabase emails.
 export async function sendMagicLinkAlternative(email: string, redirectTo?: string) {
   try {
     // This approach lets Supabase handle the OTP generation completely
@@ -161,6 +166,7 @@ export async function sendMagicLinkAlternative(email: string, redirectTo?: strin
     return { data: null, error };
   }
 }
+*/
 
 // Test the connection
 (async () => {

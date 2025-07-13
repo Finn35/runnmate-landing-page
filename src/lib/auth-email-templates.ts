@@ -2,8 +2,8 @@
 export const authEmailTemplates = {
   magicLink: {
     subject: {
-      en: 'Your Runnmate Login Link',
-      nl: 'Uw Runnmate Inloglink'
+        en: 'Your Runnmate Login Link',
+        nl: 'Uw Runnmate Inloglink'
     },
     html: (link: string, email: string, lang: string = 'en') => {
       const content = {

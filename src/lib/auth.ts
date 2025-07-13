@@ -16,7 +16,18 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     if (!session?.user) {
-      return null
+      // Sometimes sessions take a moment to establish, try once more
+      await new Promise(resolve => setTimeout(resolve, 100))
+      const { data: { session: retrySession }, error: retryError } = await supabase.auth.getSession()
+      
+      if (retryError || !retrySession?.user) {
+        return null
+      }
+      
+      return {
+        id: retrySession.user.id,
+        email: retrySession.user.email || '',
+      }
     }
 
     return {

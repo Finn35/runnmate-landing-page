@@ -30,6 +30,23 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 - Go to Settings → API
 - Copy "Project URL" and "anon public" key
 
+## 2.1. 🚨 CRITICAL: Disable Supabase Email Templates
+
+**To prevent duplicate emails (Supabase + Resend), you MUST disable Supabase's built-in email templates:**
+
+1. In your Supabase dashboard, go to **Authentication** → **Email Templates**
+2. For each template (Magic Link, Confirm Signup, Invite User, Reset Password):
+   - Click on the template
+   - **Clear the HTML content** (delete everything in the template)
+   - **Clear the subject line** (make it empty)
+   - Click **Save**
+
+**Why this is needed:**
+- Your app uses Resend for custom emails
+- Supabase will send its own emails if templates are enabled
+- This causes users to receive duplicate emails
+- Clearing templates disables Supabase's email sending
+
 ## 3. Create the Database Table
 
 1. In your Supabase dashboard, go to the SQL Editor

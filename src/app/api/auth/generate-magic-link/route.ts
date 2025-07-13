@@ -86,27 +86,27 @@ export async function POST(request: Request) {
 
       // Send our custom email with the converted link
       const lang = String(language || 'en');
-      const emailSent = await sendEmail({
-        to: email,
+    const emailSent = await sendEmail({
+      to: email,
         subject: authEmailTemplates.magicLink.subject[lang as 'en' | 'nl'] || authEmailTemplates.magicLink.subject.en,
         html: authEmailTemplates.magicLink.html(customMagicLink, email, lang),
-        from: 'Runnmate <admin@runnmate.com>'
-      })
+      from: 'Runnmate <admin@runnmate.com>'
+    })
 
-      if (!emailSent) {
-        console.error('Failed to send email via Resend')
-        return NextResponse.json(
-          { error: 'Failed to send magic link email' },
-          { status: 500 }
-        )
-      }
+    if (!emailSent) {
+      console.error('Failed to send email via Resend')
+      return NextResponse.json(
+        { error: 'Failed to send magic link email' },
+        { status: 500 }
+      )
+    }
 
-      console.log('Magic link email sent successfully via Resend')
+    console.log('Magic link email sent successfully via Resend')
 
-      return NextResponse.json({ 
-        success: true,
-        message: 'Magic link sent successfully' 
-      })
+    return NextResponse.json({ 
+      success: true,
+      message: 'Magic link sent successfully' 
+    })
 
     } catch (linkError) {
       console.error('Error processing admin magic link:', linkError)
