@@ -334,34 +334,30 @@ export default function BrowsePage() {
     }
     checkAuth()
 
-    // Listen for auth state changes
+    // Listen for auth state changes (login, logout, magic link, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed in browse page:', event, session?.user?.email)
         if (event === 'SIGNED_IN' && session) {
-          const currentUser = await getCurrentUser()
-          console.log('User authenticated, setting user state:', currentUser?.email)
-          setUser(currentUser)
+          await checkAuth(); // Re-fetch user and Strava data
         } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out, clearing user state')
-          setUser(null)
+          setUser(null);
         }
       }
-    )
+    );
 
-    // Also check auth when page becomes visible (user returns from login)
+    // Also re-check when page becomes visible (user returns from login/Strava)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        checkAuth()
+        checkAuth();
       }
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      subscription.unsubscribe()
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const loadListings = async () => {
     try {

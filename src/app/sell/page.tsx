@@ -48,7 +48,6 @@ export default function SellPage() {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
           setUser(session.user)
-          // Auto-fill email if user is logged in
           setFormData(prev => ({ ...prev, sellerEmail: session.user.email || '' }))
         }
       } catch (error) {
@@ -60,21 +59,32 @@ export default function SellPage() {
 
     checkAuth()
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user)
-        setFormData(prev => ({ ...prev, sellerEmail: session.user.email || '' }))
-      } else {
-        setUser(null)
-        setFormData(prev => ({ ...prev, sellerEmail: '' }))
+    // Listen for auth state changes (login, logout, magic link, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          setUser(session.user)
+          setFormData(prev => ({ ...prev, sellerEmail: session.user.email || '' }))
+        } else {
+          setUser(null)
+          setFormData(prev => ({ ...prev, sellerEmail: '' }))
+        }
       }
-    })
+    );
+
+    // Also re-check when page becomes visible (user returns from login/Strava)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkAuth();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // Check Strava verification when email changes
   useEffect(() => {

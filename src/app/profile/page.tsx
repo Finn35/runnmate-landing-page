@@ -26,7 +26,32 @@ function ProfileForm() {
 
   useEffect(() => {
     checkAuthAndLoadData()
-  }, [])
+
+    // Listen for auth state changes (login, logout, magic link, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          await checkAuthAndLoadData(); // Re-fetch user and Strava data
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setStravaVerification(null);
+        }
+      }
+    );
+
+    // Also re-check when page becomes visible (user returns from login/Strava)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkAuthAndLoadData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     // Check for Strava success/error messages
