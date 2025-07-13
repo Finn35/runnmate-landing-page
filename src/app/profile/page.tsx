@@ -30,9 +30,9 @@ function ProfileForm() {
 
   useEffect(() => {
     // Check for Strava success/error messages
-    const stravaSuccess = searchParams.get('strava_success')
-    const stravaError = searchParams.get('strava_error')
-    const distance = searchParams.get('distance')
+    const stravaSuccess = searchParams?.get('strava_success') || ''
+    const stravaError = searchParams?.get('strava_error') || ''
+    const distance = searchParams?.get('distance') || ''
 
     if (stravaSuccess) {
       setMessage({

@@ -13,12 +13,12 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const returnTo = searchParams.get('returnTo')
+  const returnTo = searchParams?.get('returnTo') || ''
 
   // Handle URL error parameters
   useEffect(() => {
-    const urlError = searchParams.get('error')
-    const urlMessage = searchParams.get('message')
+    const urlError = searchParams?.get('error') || ''
+    const urlMessage = searchParams?.get('message') || ''
     
     if (urlError) {
       switch (urlError) {
@@ -79,7 +79,7 @@ function LoginForm() {
       redirectParams.set('returnTo', finalReturnTo)
 
       // Add any message parameter if it exists
-      const message = searchParams.get('message')
+      const message = searchParams?.get('message') || ''
       if (message) {
         redirectParams.set('message', message)
       }
