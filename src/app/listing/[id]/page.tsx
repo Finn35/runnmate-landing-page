@@ -29,7 +29,7 @@ interface Listing {
 
 export default function ListingDetailPage() {
   const params = useParams()
-  const listingId = params.id as string
+  const listingId = params?.id as string || ''
   const { t } = useLanguage()
   
   const [listing, setListing] = useState<Listing | null>(null)
