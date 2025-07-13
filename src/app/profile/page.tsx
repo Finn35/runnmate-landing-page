@@ -53,6 +53,15 @@ function ProfileForm() {
     };
   }, []);
 
+  // Always reload Strava verification when user changes (after login, connect, etc.)
+  useEffect(() => {
+    if (user?.email) {
+      loadStravaVerification();
+    } else {
+      setStravaVerification(null);
+    }
+  }, [user?.email]);
+
   useEffect(() => {
     // Check for Strava success/error messages
     const stravaSuccess = searchParams?.get('strava_success') || ''
