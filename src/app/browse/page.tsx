@@ -588,21 +588,6 @@ export default function BrowsePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-            <Link href="/" className="flex items-center">
-              {/* Removed Logo component */}
-            </Link>
-            
-            <nav className="flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">{t('header.home')}</Link>
-              <Link href="/sell" className="text-gray-700 hover:text-blue-600 transition-colors">{t('header.sell')}</Link>
-              <Link href="/browse" className="text-blue-600 font-medium">{t('header.browse')}</Link>
-            </nav>
-          </div>
-        </header>
-
         <LoadingSection message="Loading running shoes...">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
             <LoadingCard count={8} />
