@@ -14,9 +14,9 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const tokenHash = searchParams.get('token_hash')
-        const type = searchParams.get('type')
-        const returnTo = searchParams.get('returnTo') || '/'
+        const tokenHash = searchParams?.get('token_hash') || ''
+        const type = searchParams?.get('type') || ''
+        const returnTo = searchParams?.get('returnTo') || '/'
 
         console.log('Callback parameters:', { tokenHash: !!tokenHash, type, returnTo })
 
