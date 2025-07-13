@@ -29,7 +29,7 @@ function ComingSoonForm() {
       }
 
       // Get shoe details from URL params
-      const shoe = searchParams.get('shoe')
+      const shoe = searchParams?.get('shoe')
       if (shoe) {
         setShoeTitle(decodeURIComponent(shoe))
       }
