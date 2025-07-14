@@ -278,13 +278,14 @@ export default function SellPage() {
     )
   }
 
-  if (!user) {
-    // If not authenticated, redirect to login
-    if (typeof window !== 'undefined') {
-      router.push('/login?message=login_required')
-    }
-    return null
-  }
+  // Remove this block:
+  // if (!user) {
+  //   // If not authenticated, redirect to login
+  //   if (typeof window !== 'undefined') {
+  //     router.push('/login?message=login_required')
+  //   }
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
