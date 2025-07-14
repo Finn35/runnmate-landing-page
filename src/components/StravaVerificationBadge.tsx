@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StravaVerification {
   strava_athlete_name: string
@@ -27,31 +28,36 @@ export default function StravaVerificationBadge({
   showConnectButton = false,
   iconOnly = false // NEW PROP
 }: StravaVerificationBadgeProps) {
+  const { user, isAuthLoading } = useAuth();
   const router = useRouter()
   const [verification, setVerification] = useState<StravaVerification | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isConnecting, setIsConnecting] = useState(false)
 
+  // Use prop if provided, otherwise use logged-in user's email
+  const effectiveEmail = userEmail || user?.email;
+
   useEffect(() => {
-    if (!userEmail) {
+    if (isAuthLoading) {
+      setIsLoading(true);
+      return;
+    }
+    if (!effectiveEmail) {
       setIsLoading(false)
       return
     }
-
     loadVerification()
-  }, [userEmail])
+  }, [effectiveEmail, isAuthLoading])
 
   const loadVerification = async () => {
-    if (typeof userEmail !== 'string') return
-
+    if (typeof effectiveEmail !== 'string') return
     try {
       const { data, error } = await supabase
         .from('user_strava_verifications')
         .select('strava_athlete_name, total_distance_km, total_activities, verified_at, is_active')
-        .eq('user_email', userEmail)
+        .eq('user_email', effectiveEmail)
         .eq('is_active', true)
       // Removed .single()
-
       if (data && data.length > 0 && !error) {
         setVerification(data[0])
       } else {

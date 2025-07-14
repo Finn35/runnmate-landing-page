@@ -2,35 +2,22 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Button } from './ui/button'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function StravaVerificationButton() {
   const router = useRouter()
+  const { user, isAuthLoading } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
   const [isVerified, setIsVerified] = useState(false)
-  const [session, setSession] = useState<any>(null)
 
   useEffect(() => {
-    // Check authentication and verification status
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user?.email) {
-        checkStravaVerification(session.user.email)
-      }
-      setIsLoading(false)
-    })
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      if (session?.user?.email) {
-        checkStravaVerification(session.user.email)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
+    if (user?.email) {
+      checkStravaVerification(user.email)
+    } else {
+      setIsVerified(false)
     }
-  }, [])
+    setIsLoading(false)
+  }, [user?.email])
 
   const checkStravaVerification = async (email: string) => {
     try {
@@ -39,8 +26,6 @@ export default function StravaVerificationButton() {
         .select('is_active')
         .eq('user_email', email)
         .eq('is_active', true)
-      // Removed .single()
-
       setIsVerified(!!(data && data.length > 0))
     } catch (error) {
       console.error('Error checking Strava verification:', error)
@@ -48,18 +33,17 @@ export default function StravaVerificationButton() {
   }
 
   const handleStravaConnect = async () => {
-    if (!session?.user?.email) {
+    if (!user?.email) {
       // User not logged in, redirect to login
       const currentPath = window.location.pathname + window.location.search
       router.push(`/login?message=login_required&returnTo=${encodeURIComponent(currentPath)}`)
       return
     }
-
     // Use our auth route instead of going directly to Strava
-    window.location.href = `/api/strava/auth?user_email=${encodeURIComponent(session.user.email)}`
+    window.location.href = `/api/strava/auth?user_email=${encodeURIComponent(user.email)}`
   }
 
-  if (isLoading) {
+  if (isAuthLoading || isLoading) {
     return (
       <Button disabled variant="outline" className="w-full h-12 text-base">
         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -13,6 +13,7 @@ import { useToastHelpers } from '@/components/ui/toast'
 import { Pagination, PaginationInfo } from '@/components/ui/pagination'
 import { useLanguage } from '@/contexts/LanguageContext'
 import StravaVerificationBadge from '@/components/StravaVerificationBadge'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Listing {
   id: string
@@ -302,10 +303,9 @@ export default function BrowsePage() {
   const router = useRouter()
   const { t, language } = useLanguage();
   const toast = useToastHelpers()
-  
+  const { user, isAuthLoading } = useAuth()
+
   const [listings, setListings] = useState<Listing[]>([])
-  const [user, setUser] = useState<{ email: string; user_metadata?: { name?: string } } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState({
     size: '',
@@ -326,117 +326,64 @@ export default function BrowsePage() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
   const [, setIsSubmittingOffer] = useState(false)
 
-  // Check if user is authenticated
-  useEffect(() => {
-    const checkAuth = async () => {
-      const currentUser = await getCurrentUser()
-      setUser(currentUser)
-    }
-    checkAuth()
-
-    // Listen for auth state changes (login, logout, magic link, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          await checkAuth(); // Re-fetch user and Strava data
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-      }
-    );
-
-    // Also re-check when page becomes visible (user returns from login/Strava)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkAuth();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      subscription.unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
+  // Define loadListings before useEffect
   const loadListings = async () => {
     try {
-      setIsLoading(true)
-      
-      console.log('Loading listings for user:', user);
-
-      // First check if we can connect
+      // Use isAuthLoading to block until auth is ready
+      if (isAuthLoading) return
       const { data: testData, error: testError } = await supabase
         .from('listings')
         .select('count');
-
       if (testError) {
         console.error('Database connection error:', testError);
         toast.error('Failed to connect to database', testError.message);
         return;
       }
-
-      console.log('Database connection test successful, count:', testData);
-
-      // Now get the actual listings
       const { data, error, status } = await supabase
         .from('listings')
         .select('*')
         .order('created_at', { ascending: false });
-
-      console.log('Listings fetch result:', { status, error, data });
-
       if (error) {
-        // Handle invalid session: sign out and reload for public access
         if (status === 401 || status === 403) {
           toast.error('Session expired or invalid. Reloading as guest...');
           await supabase.auth.signOut();
-          setTimeout(() => window.location.reload(), 1200); // Give user time to see toast
+          setTimeout(() => window.location.reload(), 1200);
           return;
         }
         console.error('Error fetching listings:', error);
         toast.error('Failed to fetch listings', error.message);
-        setListings([]); // Ensure listings is empty on error
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        console.log('No listings found in database');
         setListings([]);
         return;
       }
-
-      console.log('Successfully fetched listings:', {
-        count: data.length,
-        firstListing: data[0],
-        lastListing: data[data.length - 1]
-      });
-
+      if (!data || data.length === 0) {
+        setListings([]);
+        return;
+      }
       setListings(data);
     } catch (err) {
       console.error('Unexpected error in loadListings:', err);
       toast.error('Unexpected error', err instanceof Error ? err.message : 'Unknown error');
-      setListings([]); // Ensure listings is empty on error
-    } finally {
-      setIsLoading(false);
+      setListings([]);
     }
   }
 
-  // Load listings on mount
+  // Load listings on mount and when isAuthLoading changes
   useEffect(() => {
-    loadListings()
-  }, [])
+    if (!isAuthLoading) {
+      loadListings()
+    }
+  }, [isAuthLoading])
 
   // Debug: Timeout fallback for loading
   useEffect(() => {
-    if (isLoading) {
+    if (isAuthLoading) {
       const timeout = setTimeout(() => {
         toast.error('Loading is taking too long. Please refresh or try logging out and in again.');
-        setIsLoading(false);
+        // setIsLoading(false); // This line is removed as per new_code
       }, 8000);
       return () => clearTimeout(timeout);
     }
-  }, [isLoading]);
+  }, [isAuthLoading]);
 
   // Combined filtering logic
   const filteredListings = useMemo(() => {
@@ -603,15 +550,18 @@ export default function BrowsePage() {
     router.push(`/listing/${listing.id}`)
   }
 
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSection message="Loading running shoes..." />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading listings...</p>
+        </div>
       </div>
     )
   }
 
-  if (!isLoading && listings.length === 0) {
+  if (!isAuthLoading && listings.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -774,7 +724,7 @@ export default function BrowsePage() {
       </div>
 
       {/* Listings Grid */}
-      {isLoading ? (
+      {isAuthLoading ? (
         <LoadingSection />
       ) : (
         <>

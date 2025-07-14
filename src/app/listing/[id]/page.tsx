@@ -9,6 +9,7 @@ import { getCurrentUser } from '@/lib/auth'
 // Removed direct email service import - using API route instead
 import { useLanguage } from '@/contexts/LanguageContext'
 import StravaVerificationBadge from '@/components/StravaVerificationBadge'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Listing {
   id: string
@@ -31,10 +32,10 @@ export default function ListingDetailPage() {
   const params = useParams()
   const listingId = params?.id as string || ''
   const { t } = useLanguage()
-  
+  const { user, isAuthLoading } = useAuth()
+
   const [listing, setListing] = useState<Listing | null>(null)
-  const [user, setUser] = useState<{ email: string; user_metadata?: { name?: string } } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // Remove local user and isLoading state
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [imageLoading, setImageLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
@@ -80,38 +81,7 @@ export default function ListingDetailPage() {
     }
   }, [touchStart, touchEnd, listing?.image_urls.length])
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const currentUser = await getCurrentUser()
-      setUser(currentUser)
-    }
-    checkAuth()
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          const currentUser = await getCurrentUser()
-          setUser(currentUser)
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null)
-        }
-      }
-    )
-
-    // Also check auth when page becomes visible (user returns from login)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkAuth()
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      subscription.unsubscribe()
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
+  // Remove checkAuth logic and related useEffect
 
   useEffect(() => {
     if (listingId) {
@@ -121,7 +91,7 @@ export default function ListingDetailPage() {
 
   const loadListing = async () => {
     try {
-      setIsLoading(true)
+      // setIsLoading(true) // Removed local isLoading
       const { data, error } = await supabase
         .from('listings')
         .select('*')
@@ -137,7 +107,7 @@ export default function ListingDetailPage() {
     } catch (error) {
       console.error('Error loading listing:', error)
     } finally {
-      setIsLoading(false)
+      // setIsLoading(false) // Removed local isLoading
     }
   }
 
@@ -306,7 +276,7 @@ export default function ListingDetailPage() {
     }
   }
 
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

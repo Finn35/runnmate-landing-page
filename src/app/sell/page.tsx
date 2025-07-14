@@ -8,15 +8,15 @@ import { LoadingSpinner } from '@/components/ui/loading'
 import { useToastHelpers } from '@/components/ui/toast'
 // import Logo from '@/components/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function SellPage() {
   const { t } = useLanguage()
   const router = useRouter()
   const toast = useToastHelpers()
-  
+  const { user, isAuthLoading } = useAuth()
+
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [formData, setFormData] = useState({
     title: '',
     brand: '',
@@ -41,50 +41,12 @@ export default function SellPage() {
   // Consent for authenticity
   const [authenticityConsent, setAuthenticityConsent] = useState(false)
 
-  // Check authentication on mount
+  // Set sellerEmail from user if available
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          setUser(session.user)
-          setFormData(prev => ({ ...prev, sellerEmail: session.user.email || '' }))
-        }
-      } catch (error) {
-        console.error('Error checking auth:', error)
-      } finally {
-        setIsLoadingAuth(false)
-      }
+    if (user?.email) {
+      setFormData(prev => ({ ...prev, sellerEmail: user.email }))
     }
-
-    checkAuth()
-
-    // Listen for auth state changes (login, logout, magic link, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session?.user) {
-          setUser(session.user)
-          setFormData(prev => ({ ...prev, sellerEmail: session.user.email || '' }))
-        } else {
-          setUser(null)
-          setFormData(prev => ({ ...prev, sellerEmail: '' }))
-        }
-      }
-    );
-
-    // Also re-check when page becomes visible (user returns from login/Strava)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkAuth();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      subscription.unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  }, [user?.email])
 
   // Check Strava verification when email changes
   useEffect(() => {
@@ -303,7 +265,7 @@ export default function SellPage() {
     }
   }
 
-  if (isLoadingAuth) {
+  if (isAuthLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <main className="max-w-2xl mx-auto px-4 py-8">
@@ -314,6 +276,14 @@ export default function SellPage() {
         </main>
       </div>
     )
+  }
+
+  if (!user) {
+    // If not authenticated, redirect to login
+    if (typeof window !== 'undefined') {
+      router.push('/login?message=login_required')
+    }
+    return null
   }
 
   return (

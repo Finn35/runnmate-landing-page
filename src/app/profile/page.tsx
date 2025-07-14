@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { getCurrentUser } from '@/lib/auth'
+import { useAuth } from '@/contexts/AuthContext'
 // Header is included in root layout
 
 interface StravaVerification {
@@ -18,40 +18,10 @@ interface StravaVerification {
 function ProfileForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [user, setUser] = useState<{ email: string; user_metadata?: { name?: string } } | null>(null)
+  const { user, isAuthLoading } = useAuth()
   const [stravaVerification, setStravaVerification] = useState<StravaVerification | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [isDisconnecting, setIsDisconnecting] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-
-  useEffect(() => {
-    checkAuthAndLoadData()
-
-    // Listen for auth state changes (login, logout, magic link, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          await checkAuthAndLoadData(); // Re-fetch user and Strava data
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setStravaVerification(null);
-        }
-      }
-    );
-
-    // Also re-check when page becomes visible (user returns from login/Strava)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkAuthAndLoadData();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      subscription.unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
 
   // Always reload Strava verification when user changes (after login, connect, etc.)
   useEffect(() => {
@@ -80,24 +50,6 @@ function ProfileForm() {
       router.replace('/profile')
     }
   }, [searchParams, router])
-
-  const checkAuthAndLoadData = async () => {
-    try {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) {
-        router.push('/login?message=login_required')
-        return
-      }
-      
-      setUser(currentUser)
-      await loadStravaVerification()
-    } catch (error) {
-      console.error('Error checking auth:', error)
-      router.push('/login?message=session_expired')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const loadStravaVerification = async () => {
     if (!user?.email) return
@@ -159,7 +111,7 @@ function ProfileForm() {
     }
   }
 
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -168,6 +120,14 @@ function ProfileForm() {
         </div>
       </div>
     )
+  }
+
+  if (!user) {
+    // If not authenticated, redirect to login
+    if (typeof window !== 'undefined') {
+      router.push('/login?message=login_required')
+    }
+    return null
   }
 
       return (

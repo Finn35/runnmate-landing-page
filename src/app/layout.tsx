@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 // Temporarily removed analytics to fix build issues
 // import ClientAnalyticsWrapper from '@/components/ClientAnalyticsWrapper';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 // Temporarily disable fonts to fix build errors
 // const geistSans = localFont({
@@ -63,17 +64,19 @@ export default function RootLayout({
       <body
         className="antialiased"
       >
-        <LanguageProvider>
-          <ToastProvider>
-            <GoogleAnalytics />
-            {/* Temporarily removed analytics to fix build issues */}
-            {/* <ClientAnalyticsWrapper /> */}
-            <Header />
-            <main>
-              {children}
-            </main>
-          </ToastProvider>
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <ToastProvider>
+              <GoogleAnalytics />
+              {/* Temporarily removed analytics to fix build issues */}
+              {/* <ClientAnalyticsWrapper /> */}
+              <Header />
+              <main>
+                {children}
+              </main>
+            </ToastProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );
