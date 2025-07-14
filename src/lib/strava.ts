@@ -75,13 +75,13 @@ async function getStravaTokens(userEmail: string): Promise<StravaTokens | null> 
     .select('access_token, refresh_token, token_expires_at')
     .eq('user_email', userEmail)
     .eq('is_active', true)
-    .single()
+  // Removed .single()
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     return null
   }
 
-  return data
+  return data[0]
 }
 
 /**

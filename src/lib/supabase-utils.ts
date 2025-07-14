@@ -59,14 +59,13 @@ export async function createListing(listingData: {
         }
       ])
       .select()
-      .single()
 
     if (error) {
       console.error('Database error:', error)
       throw new Error('Failed to create listing')
     }
 
-    return data
+    return data && data.length > 0 ? data[0] : null
   } catch (error) {
     console.error('Error creating listing:', error)
     throw error
@@ -135,14 +134,13 @@ export async function createOffer(offerData: {
         }
       ])
       .select()
-      .single()
 
     if (error) {
       console.error('Database error:', error)
       throw new Error('Failed to create offer')
     }
 
-    return data
+    return data && data.length > 0 ? data[0] : null
   } catch (error) {
     console.error('Error creating offer:', error)
     throw error
@@ -156,14 +154,13 @@ export async function fetchListingById(listingId: string) {
       .from('listings')
       .select('*')
       .eq('id', listingId)
-      .single()
 
     if (error) {
       console.error('Database error:', error)
       throw new Error('Failed to fetch listing')
     }
 
-    return data
+    return data && data.length > 0 ? data[0] : null
   } catch (error) {
     console.error('Error fetching listing:', error)
     throw error
