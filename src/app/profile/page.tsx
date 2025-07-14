@@ -69,14 +69,9 @@ function ProfileForm() {
     const distance = searchParams?.get('distance') || ''
 
     if (stravaSuccess) {
-      setMessage({
-        type: 'success',
-        text: `Strava connected successfully! ${distance} km logged.`
-      })
-      // Clear URL parameters
-      router.replace('/profile')
-      // Reload Strava data
-      loadStravaVerification()
+      // Force a full reload to ensure session and client state are fresh
+      window.location.href = '/';
+      return;
     } else if (stravaError) {
       setMessage({
         type: 'error',
@@ -113,10 +108,12 @@ function ProfileForm() {
         .select('*')
         .eq('user_email', user.email)
         .eq('is_active', true)
-        .single()
+      // Removed .single()
 
-      if (data && !error) {
-        setStravaVerification(data)
+      if (data && data.length > 0 && !error) {
+        setStravaVerification(data[0])
+      } else {
+        setStravaVerification(null)
       }
     } catch {
       console.error('Error loading Strava verification')
