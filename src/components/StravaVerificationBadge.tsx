@@ -50,10 +50,12 @@ export default function StravaVerificationBadge({
         .select('strava_athlete_name, total_distance_km, total_activities, verified_at, is_active')
         .eq('user_email', userEmail)
         .eq('is_active', true)
-        .single()
+      // Removed .single()
 
-      if (data && !error) {
-        setVerification(data)
+      if (data && data.length > 0 && !error) {
+        setVerification(data[0])
+      } else {
+        setVerification(null)
       }
     } catch (error) {
       console.error('Error loading Strava verification:', error)

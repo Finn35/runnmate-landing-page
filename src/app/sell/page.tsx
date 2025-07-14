@@ -103,10 +103,10 @@ export default function SellPage() {
         .select('total_distance_km, total_activities, strava_athlete_name, verified_at')
         .eq('user_email', email)
         .eq('is_active', true)
-        .single()
+      // Removed .single()
 
-      if (data && !error) {
-        setStravaVerification(data)
+      if (data && data.length > 0 && !error) {
+        setStravaVerification(data[0])
       } else {
         setStravaVerification(null)
       }

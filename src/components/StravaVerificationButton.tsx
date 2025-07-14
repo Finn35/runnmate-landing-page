@@ -39,9 +39,9 @@ export default function StravaVerificationButton() {
         .select('is_active')
         .eq('user_email', email)
         .eq('is_active', true)
-        .single()
+      // Removed .single()
 
-      setIsVerified(!!data)
+      setIsVerified(!!(data && data.length > 0))
     } catch (error) {
       console.error('Error checking Strava verification:', error)
     }

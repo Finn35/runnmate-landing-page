@@ -126,14 +126,14 @@ export default function ListingDetailPage() {
         .from('listings')
         .select('*')
         .eq('id', listingId)
-        .single()
+      // Removed .single()
 
       if (error) {
         console.error('Error loading listing:', error)
         return
       }
 
-      setListing(data)
+      setListing(data && data.length > 0 ? data[0] : null)
     } catch (error) {
       console.error('Error loading listing:', error)
     } finally {
