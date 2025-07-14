@@ -39,12 +39,14 @@ export async function POST(request: NextRequest) {
     console.log('Fetching Strava verification for:', userEmail);
 
     // Get the user's Strava verification
-    const { data: verification, error: fetchError } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('user_strava_verifications')
       .select('refresh_token')
       .eq('user_email', userEmail)
       .eq('is_active', true)
-      .single();
+    // Removed .single()
+
+    const verification = data && data.length > 0 ? data[0] : null
 
     if (fetchError || !verification) {
       console.error('Failed to fetch Strava verification:', fetchError);
